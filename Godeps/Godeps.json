@@ -1,0 +1,6 @@
+{
+	"ImportPath": "github.com/nosarthur/lib-app",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
+	"Deps": []
+}

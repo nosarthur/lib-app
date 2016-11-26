@@ -1,2 +1,1 @@
-web: libapp
-
+web: lib-app
