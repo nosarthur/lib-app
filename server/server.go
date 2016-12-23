@@ -45,5 +45,5 @@ func (app *Application) DeleteTodo(w http.ResponseWriter, req *http.Request) {
 func (app *Application) DeleteIssue(w http.ResponseWriter, req *http.Request) {
 }
 func (app *Application) Hello(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(res, "hello, world!")
+	fmt.Fprintln(res, "hello, nos!")
 }

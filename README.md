@@ -5,20 +5,26 @@
 * backend: go
 * frontend: polymer 
 
-## 
+## local deployment
 
-* godep save 
-* godep save ./...
-* godep save ./cmd/...
 * go install ./cmd/...
+* heroku local web
 
 ## heroku deployment
 
+To set up:
+
 * heroku login
 * heroku create -b https://github.com/heroku/heroku-buildpack-go.git
+
+To deploy
+
+* godep save ./cmd/...
+* git push heroku master
+
+To maintain:
+
 * heroku ps
 * heroku open
 * heroku logs
-* git push heroku master
-* heroku local web
 * heroku config

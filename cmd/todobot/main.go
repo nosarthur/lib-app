@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/nosarthur/lib-app/server"
@@ -12,10 +13,9 @@ import (
 func main() {
 	app := server.NewApplication()
 
-	fmt.Println("listening...")
+	fmt.Println("now listening...")
 	router := mux.NewRouter()
 	router.HandleFunc("/", app.Hello).Methods("GET")
 	router.HandleFunc("/get", app.Get).Methods("GET")
-	log.Fatal(http.ListenAndServe(":12345", router))
-	//log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
 }
