@@ -1,6 +1,6 @@
 # web application of TODO list
 
-## 
+## design
 
 * backend: go
 * frontend: polymer 
@@ -17,7 +17,7 @@ To set up:
 * heroku login
 * heroku create -b https://github.com/heroku/heroku-buildpack-go.git
 
-To deploy
+To deploy:
 
 * godep save ./cmd/...
 * git push heroku master
@@ -27,4 +27,4 @@ To maintain:
 * heroku ps
 * heroku open
 * heroku logs
-* heroku config
+* heroku config[:set|unset]

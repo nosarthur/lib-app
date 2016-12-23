@@ -5,31 +5,30 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/nosarthur/lib-app/issue"
+	"github.com/nosarthur/lib-app/ticket"
 )
 
 type Application struct {
-	db issue.AppDB
+	db ticket.AppDB
 }
 
 func NewApplication() *Application {
 	var app Application
-	//app.db.MustCreate()
 	app.db.MustInit()
 	return &app
 }
 
 func (app *Application) Get(w http.ResponseWriter, req *http.Request) {
-	json.NewEncoder(w).Encode(issue.Issue{})
+	json.NewEncoder(w).Encode(ticket.Ticket{})
 }
 
-func (app *Application) CreateIssue(w http.ResponseWriter, req *http.Request) {
-	var iss issue.Issue
-	_ = json.NewDecoder(req.Body).Decode(&iss)
+func (app *Application) CreateTicket(w http.ResponseWriter, req *http.Request) {
+	var t ticket.Ticket
+	_ = json.NewDecoder(req.Body).Decode(&t)
 
-	test := issue.Issue{}
+	test := ticket.Ticket{}
 	fmt.Println(test)
-	id, err := app.db.AddIssue(&test)
+	id, err := app.db.AddTicket(&test)
 	if err != nil {
 		panic(err)
 	}
@@ -37,12 +36,12 @@ func (app *Application) CreateIssue(w http.ResponseWriter, req *http.Request) {
 }
 
 func (app *Application) CreateTodo(w http.ResponseWriter, req *http.Request) {
-	json.NewEncoder(w).Encode(issue.Issue{})
+	json.NewEncoder(w).Encode(ticket.Ticket{})
 }
 
-func (app *Application) DeleteTodo(w http.ResponseWriter, req *http.Request) {
+func (app *Application) EndTodo(w http.ResponseWriter, req *http.Request) {
 }
-func (app *Application) DeleteIssue(w http.ResponseWriter, req *http.Request) {
+func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) {
 }
 func (app *Application) Hello(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(res, "hello, nos!")
