@@ -1,6 +1,10 @@
 package storage
 
-import "github.com/jmoiron/sqlx"
+import (
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type AppDB struct {
 	db *sqlx.DB
@@ -8,9 +12,10 @@ type AppDB struct {
 
 func (adb *AppDB) MustInit() {
 	adb.db = sqlx.MustConnect("sqlite3", "./app.sqlite")
+	fmt.Println("database connected.")
 }
 
-func (adb *AppDB) Get() ([]Ticket, error) {
+func (adb *AppDB) GetAll() ([]Ticket, error) {
 	rows, err := adb.db.Queryx("SELECT * FROM ticket")
 	if err != nil {
 		panic(err)
@@ -33,17 +38,17 @@ func (adb *AppDB) Get() ([]Ticket, error) {
 func (adb *AppDB) MustCreateTables() {
 	schema := `
 	CREATE TABLE ticket (
-		id          INTEGER PRIMARY KEY AUTOINCREMENT,
-		label       TEXT NOT NULL,
+		id 			TEXT PRIMARY KEY,
 		description TEXT,
 		start_time  DATETIME NOT NULL,
 		end_time    DATETIME,
-		priority    INTEGER
+		priority    INTEGER NOT NULL
 	);
 
 	CREATE TABLE todo (
 		id        INTEGER PRIMARY KEY AUTOINCREMENT,
 		ticket_id INTEGER NOT NULL,
+		idx       INTEGER NOT NULL,
 		item      INTEGER NOT NULL,
 		active    INTEGER NOT NULL
 	);`

@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/nosarthur/lib-app/storage"
 )
 
@@ -20,7 +22,7 @@ func NewApplication() *Application {
 
 func (app *Application) Get(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "hello, nos!")
-	tickets, err := app.db.Get()
+	tickets, err := app.db.GetAll()
 	if err != nil {
 		panic(err)
 	}
@@ -35,16 +37,30 @@ func (app *Application) Get(w http.ResponseWriter, req *http.Request) {
 }
 
 func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) {
-	var t storage.Ticket
+	t := storage.Ticket{StartTime: time.Now()}
 	_ = json.NewDecoder(req.Body).Decode(&t)
 
-	fmt.Println(req.Body)
-	id, err := app.db.CreateTicket(&t)
-	fmt.Println(t)
+	err := app.db.CreateTicket(t)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(id)
+}
+
+func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) {
+	params := mux.Vars(req)
+	t, err := app.db.ReadTicket(params["id"])
+	if t.EndTime != nil {
+		panic("It's alread ended.")
+	}
+	now := time.Now()
+	if now.Before(t.StartTime) {
+		panic("End time ealier than start time")
+	}
+	t.EndTime = &now
+	err = app.db.UpdateTicket(t)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) {
@@ -54,6 +70,4 @@ func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) {
 }
 
 func (app *Application) EndTodo(w http.ResponseWriter, req *http.Request) {
-}
-func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) {
 }

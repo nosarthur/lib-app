@@ -13,12 +13,17 @@ import (
 func main() {
 	app := server.NewApplication()
 
-	fmt.Println("now listening...")
-	router := mux.NewRouter()
+	fmt.Println("start listening...")
+	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", app.Get).Methods("GET")
-	router.HandleFunc("/todo/add", app.AddTodo).Methods("POST")
-	router.HandleFunc("/todo/end", app.EndTodo).Methods("DELETE")
-	router.HandleFunc("/ticket/add", app.AddTicket).Methods("POST")
-	router.HandleFunc("/ticket/end", app.EndTicket).Methods("DELETE")
+
+	ticket := router.PathPrefix("/ticket").Subrouter()
+	ticket.HandleFunc("/add", app.AddTicket).Methods("POST")
+	ticket.HandleFunc("/end/{id}", app.EndTicket).Methods("DELETE")
+
+	todo := router.PathPrefix("/todo").Subrouter()
+	todo.HandleFunc("/add", app.AddTodo).Methods("POST")
+	todo.HandleFunc("/end", app.EndTodo).Methods("DELETE")
+	//http.Handle("/", router)
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
 }
