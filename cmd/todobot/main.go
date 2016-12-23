@@ -15,11 +15,10 @@ func main() {
 
 	fmt.Println("now listening...")
 	router := mux.NewRouter()
-	router.HandleFunc("/", app.Hello).Methods("GET")
-	router.HandleFunc("/get", app.Get).Methods("GET")
-	router.HandleFunc("/todo/create", app.CreateTodo).Methods("POST")
-	router.HandleFunc("/ticket/create", app.CreateTicket).Methods("POST")
-	router.HandleFunc("/ticket/end", app.EndTicket).Methods("DELETE")
+	router.HandleFunc("/", app.Get).Methods("GET")
+	router.HandleFunc("/todo/add", app.AddTodo).Methods("POST")
 	router.HandleFunc("/todo/end", app.EndTodo).Methods("DELETE")
+	router.HandleFunc("/ticket/add", app.AddTicket).Methods("POST")
+	router.HandleFunc("/ticket/end", app.EndTicket).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
 }

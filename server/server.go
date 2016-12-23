@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/nosarthur/lib-app/ticket"
+	"github.com/nosarthur/lib-app/storage"
 )
 
 type Application struct {
-	db ticket.AppDB
+	db storage.AppDB
 }
 
 func NewApplication() *Application {
@@ -19,30 +19,41 @@ func NewApplication() *Application {
 }
 
 func (app *Application) Get(w http.ResponseWriter, req *http.Request) {
-	json.NewEncoder(w).Encode(ticket.Ticket{})
+	fmt.Fprintln(w, "hello, nos!")
+	tickets, err := app.db.Get()
+	if err != nil {
+		panic(err)
+	}
+	reply := map[string]interface{}{
+		"tickets": tickets,
+	}
+	data, err := json.Marshal(reply)
+	if err != nil {
+		panic(err)
+	}
+	w.Write(data)
 }
 
-func (app *Application) CreateTicket(w http.ResponseWriter, req *http.Request) {
-	var t ticket.Ticket
+func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) {
+	var t storage.Ticket
 	_ = json.NewDecoder(req.Body).Decode(&t)
 
-	test := ticket.Ticket{}
-	fmt.Println(test)
-	id, err := app.db.AddTicket(&test)
+	fmt.Println(req.Body)
+	id, err := app.db.CreateTicket(&t)
+	fmt.Println(t)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(id)
 }
 
-func (app *Application) CreateTodo(w http.ResponseWriter, req *http.Request) {
-	json.NewEncoder(w).Encode(ticket.Ticket{})
+func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) {
+	var t storage.Todo
+	_ = json.NewDecoder(req.Body).Decode(&t)
+
 }
 
 func (app *Application) EndTodo(w http.ResponseWriter, req *http.Request) {
 }
 func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) {
-}
-func (app *Application) Hello(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(res, "hello, nos!")
 }
