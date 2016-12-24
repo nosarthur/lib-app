@@ -47,10 +47,10 @@ func (adb *AppDB) MustCreateTables() {
 
 	CREATE TABLE todo (
 		id        INTEGER PRIMARY KEY AUTOINCREMENT,
-		ticket_id INTEGER NOT NULL,
+		ticket_id TEXT NOT NULL,
 		idx       INTEGER NOT NULL,
-		item      INTEGER NOT NULL,
-		active    INTEGER NOT NULL
+		item      TEXT NOT NULL,
+		done      INTEGER NOT NULL
 	);`
 	db := sqlx.MustConnect("sqlite3", "./app.sqlite")
 	_, err := db.Exec(schema)

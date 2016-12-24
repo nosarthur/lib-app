@@ -14,7 +14,7 @@ func main() {
 	app := server.NewApplication()
 
 	fmt.Println("start listening...")
-	router := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter()
 	router.HandleFunc("/", app.Get).Methods("GET")
 
 	ticket := router.PathPrefix("/ticket").Subrouter()
@@ -23,7 +23,7 @@ func main() {
 
 	todo := router.PathPrefix("/todo").Subrouter()
 	todo.HandleFunc("/add", app.AddTodo).Methods("POST")
-	todo.HandleFunc("/end", app.EndTodo).Methods("DELETE")
+	todo.HandleFunc("/end/{ticket_id}/{idx}", app.EndTodo).Methods("DELETE")
 	//http.Handle("/", router)
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
 }

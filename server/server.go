@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -26,6 +27,15 @@ func (app *Application) Get(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	for i, t := range tickets {
+		todos, err := app.db.ReadTodos(t.Id)
+		if err != nil {
+			panic(err)
+		}
+		tickets[i].Todos = make([]storage.Todo, len(todos))
+		copy(tickets[i].Todos, todos)
+	}
+	fmt.Println(tickets)
 	reply := map[string]interface{}{
 		"tickets": tickets,
 	}
@@ -38,9 +48,12 @@ func (app *Application) Get(w http.ResponseWriter, req *http.Request) {
 
 func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) {
 	t := storage.Ticket{StartTime: time.Now()}
-	_ = json.NewDecoder(req.Body).Decode(&t)
+	err := json.NewDecoder(req.Body).Decode(&t)
+	if err != nil {
+		panic(err)
+	}
 
-	err := app.db.CreateTicket(t)
+	err = app.db.CreateTicket(t)
 	if err != nil {
 		panic(err)
 	}
@@ -49,6 +62,9 @@ func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) {
 func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	t, err := app.db.ReadTicket(params["id"])
+	if err != nil {
+		panic(err)
+	}
 	if t.EndTime != nil {
 		panic("It's alread ended.")
 	}
@@ -64,10 +80,33 @@ func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) {
 }
 
 func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) {
-	var t storage.Todo
-	_ = json.NewDecoder(req.Body).Decode(&t)
-
+	t := storage.Todo{}
+	err := json.NewDecoder(req.Body).Decode(&t)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(t)
+	id, err := app.db.CreateTodo(t)
+	fmt.Println(id)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (app *Application) EndTodo(w http.ResponseWriter, req *http.Request) {
+	params := mux.Vars(req)
+	_, err := app.db.ReadTicket(params["ticket_id"])
+	if err != nil {
+		panic(err)
+	}
+	idx, err := strconv.ParseInt(params["idx"], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	t, err := app.db.ReadTodo(params["ticket_id"], idx)
+	t.Done = true
+	err = app.db.UpdateTodo(t)
+	if err != nil {
+		panic(err)
+	}
 }
