@@ -1,9 +1,8 @@
 # web application of TODO list
 
-## design
+This is an attempt to combine Go backend, Polymer frontend, and Slack robot into a todo list app.
 
-* backend: go
-* frontend: polymer 
+The basic data type is called `Ticket` and each `Ticket` contains multiple `Todo`s.
 
 ## local deployment
 

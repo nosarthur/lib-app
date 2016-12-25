@@ -8,7 +8,12 @@
       <li><span>{{ticket.id}}: {{ticket.detail}}</span>
           <ol>
             <template is="dom-repeat" items="{{ticket.todos}}" as="todo">
-              <li>{{todo.idx}}. {{todo.item}}</li>
+              <style>
+                .span[done]{
+                  text-decoration: line-through;
+                }
+              </style>
+              <li><span done$={{todo.done}}> {{todo.item}}, {{todo.done}}</span></li>
             </template>
           </ol>
       </li>
@@ -29,9 +34,7 @@
       is: "todo-app",
       properties: {
         reply: {
-          type: Object,
-          value: undefined,
-          notify: true
+          type: Object
         }
       },
       handleResponse: function (data){

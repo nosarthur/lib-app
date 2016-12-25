@@ -17,14 +17,14 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	ticket := router.PathPrefix("/ticket").Subrouter()
-	ticket.HandleFunc("/add", app.AddTicket).Methods("POST")
-	ticket.HandleFunc("/end/{id}", app.EndTicket).Methods("DELETE")
+	ticket.Handle("/add", server.AppHandler(app.AddTicket)).Methods("POST")
+	ticket.Handle("/end/{id}", server.AppHandler(app.EndTicket)).Methods("DELETE")
 
 	todo := router.PathPrefix("/todo").Subrouter()
-	todo.HandleFunc("/add", app.AddTodo).Methods("POST")
-	todo.HandleFunc("/end/{ticket_id}/{idx}", app.EndTodo).Methods("DELETE")
+	todo.Handle("/add", server.AppHandler(app.AddTodo)).Methods("POST")
+	todo.Handle("/end/{ticket_id}/{idx}", server.AppHandler(app.EndTodo)).Methods("DELETE")
 
-	router.HandleFunc("/data", app.Get).Methods("GET")
+	router.Handle("/data", server.AppHandler(app.Get)).Methods("GET")
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
