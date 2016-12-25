@@ -14,35 +14,24 @@ func (adb *AppDB) getTodoCount(ticket_id string) (int64, error) {
 	return count, err
 }
 
-func (adb *AppDB) CreateTodo(t Todo) (int64, error) {
-	_, err := adb.ReadTicket(t.TicketId)
-	if err != nil {
-		return 0, err
+func (adb *AppDB) CreateTodo(t Todo) error {
+	if _, err := adb.ReadTicket(t.TicketId); err != nil {
+		return err
 	}
 	count, err := adb.getTodoCount(t.TicketId)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	t.Idx = count + 1
-	result, err := adb.db.NamedExec("INSERT INTO todo (idx, item, ticket_id, done) VALUES (:idx, :item, :ticket_id, :done)", &t)
-	if err != nil {
-		return 0, err
-	}
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
+	_, err = adb.db.NamedExec("INSERT INTO todo (idx, item, ticket_id, done) VALUES (:idx, :item, :ticket_id, :done)", &t)
+	return err
 }
 
 func (adb *AppDB) ReadTodo(ticket_id string, idx int64) (Todo, error) {
 	t := Todo{}
 	query := `SELECT * from todo WHERE ticket_id=? AND idx=?`
 	err := adb.db.Get(&t, query, ticket_id, idx)
-	if err != nil {
-		return t, err
-	}
-	return t, nil
+	return t, err
 }
 
 func (adb *AppDB) ReadTodos(ticket_id string) ([]Todo, error) {
@@ -55,8 +44,7 @@ func (adb *AppDB) ReadTodos(ticket_id string) ([]Todo, error) {
 	todos := []Todo{}
 	for rows.Next() {
 		value := Todo{}
-		err = rows.StructScan(&value)
-		if err != nil {
+		if err = rows.StructScan(&value); err != nil {
 			return nil, err
 		}
 		todos = append(todos, value)

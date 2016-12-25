@@ -39,7 +39,7 @@ func (adb *AppDB) MustCreateTables() {
 	schema := `
 	CREATE TABLE ticket (
 		id 			TEXT PRIMARY KEY,
-		description TEXT,
+		detail      TEXT,
 		start_time  DATETIME NOT NULL,
 		end_time    DATETIME,
 		priority    INTEGER NOT NULL

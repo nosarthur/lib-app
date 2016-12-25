@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -22,7 +21,6 @@ func NewApplication() *Application {
 }
 
 func (app *Application) Get(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(w, "hello, nos!")
 	tickets, err := app.db.GetAll()
 	if err != nil {
 		panic(err)
@@ -35,33 +33,30 @@ func (app *Application) Get(w http.ResponseWriter, req *http.Request) {
 		tickets[i].Todos = make([]storage.Todo, len(todos))
 		copy(tickets[i].Todos, todos)
 	}
-	fmt.Println(tickets)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
 	reply := map[string]interface{}{
 		"tickets": tickets,
 	}
-	data, err := json.Marshal(reply)
-	if err != nil {
+	if err := json.NewEncoder(w).Encode(reply); err != nil {
 		panic(err)
 	}
-	w.Write(data)
 }
 
 func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) {
 	t := storage.Ticket{StartTime: time.Now()}
-	err := json.NewDecoder(req.Body).Decode(&t)
-	if err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
 		panic(err)
 	}
-
-	err = app.db.CreateTicket(t)
-	if err != nil {
+	w.WriteHeader(http.StatusCreated)
+	if err := app.db.CreateTicket(t); err != nil {
 		panic(err)
 	}
 }
 
 func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	t, err := app.db.ReadTicket(params["id"])
+	vars := mux.Vars(req)
+	t, err := app.db.ReadTicket(vars["id"])
 	if err != nil {
 		panic(err)
 	}
@@ -73,40 +68,39 @@ func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) {
 		panic("End time ealier than start time")
 	}
 	t.EndTime = &now
-	err = app.db.UpdateTicket(t)
-	if err != nil {
+	if err = app.db.UpdateTicket(t); err != nil {
 		panic(err)
 	}
 }
 
 func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) {
 	t := storage.Todo{}
-	err := json.NewDecoder(req.Body).Decode(&t)
-	if err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
+		http.Error(w, http.StatusText(500), 500)
+		return
 		panic(err)
 	}
-	fmt.Println(t)
-	id, err := app.db.CreateTodo(t)
-	fmt.Println(id)
-	if err != nil {
+	w.WriteHeader(http.StatusCreated)
+	if err := app.db.CreateTodo(t); err != nil {
 		panic(err)
 	}
 }
 
 func (app *Application) EndTodo(w http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	_, err := app.db.ReadTicket(params["ticket_id"])
+	vars := mux.Vars(req)
+	_, err := app.db.ReadTicket(vars["ticket_id"])
 	if err != nil {
 		panic(err)
 	}
-	idx, err := strconv.ParseInt(params["idx"], 10, 64)
+	idx, err := strconv.ParseInt(vars["idx"], 10, 64)
 	if err != nil {
+		http.Error(w, http.StatusText(400), 400)
+		return
 		panic(err)
 	}
-	t, err := app.db.ReadTodo(params["ticket_id"], idx)
+	t, err := app.db.ReadTodo(vars["ticket_id"], idx)
 	t.Done = true
-	err = app.db.UpdateTodo(t)
-	if err != nil {
+	if err = app.db.UpdateTodo(t); err != nil {
 		panic(err)
 	}
 }

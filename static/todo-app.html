@@ -1,0 +1,42 @@
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-ajax/iron-ajax.html">
+
+<dom-module id="todo-app">
+  <template>
+    <p>hello, nos!</p>
+    <ul>
+    <template is="dom-repeat" items="[[reply.tickets]]" as="ticket">
+      <li><span>{{ticket.id}}: {{ticket.detail}}</span>
+          <ol>
+            <template is="dom-repeat" items="{{ticket.todos}}" as="todo">
+              <li>{{todo.idx}}. {{todo.item}}</li>
+            </template>
+          </ol>
+      </li>
+    </template>
+    </ul>
+
+    <iron-ajax
+      auto=true
+      id="requestData"
+      url="/data"
+      handleAs="json"
+      on-response="handleResponse">
+    </iron-ajax>
+  </template>
+
+  <script>
+    Polymer({
+      is: "todo-app",
+      properties: {
+        reply: {
+          type: Object,
+          value: undefined,
+          notify: true
+        }
+      },
+      handleResponse: function (data){
+        this.reply= data.detail.response;
+      }
+    });
+  </script>
+</dom-module>
