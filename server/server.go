@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -44,7 +43,6 @@ func (app *Application) Get(w http.ResponseWriter, req *http.Request) error {
 		copy(tickets[i].Todos, todos)
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	fmt.Println(tickets)
 	reply := map[string]interface{}{
 		"tickets": tickets,
 	}
