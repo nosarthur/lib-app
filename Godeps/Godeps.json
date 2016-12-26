@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/nosarthur/lib-app",
+	"ImportPath": "github.com/nosarthur/todo-app",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v75",
 	"Packages": [

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/nosarthur/lib-app/server"
+	"github.com/nosarthur/todo-app/server"
 )
 
 func main() {

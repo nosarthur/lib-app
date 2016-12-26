@@ -25,10 +25,28 @@ To deploy:
 
 * godep save ./cmd/...
 * git push heroku master
+* heroku open
+
+To create database
+
+* heroku addons:create heroku-postgresql:hobby-dev
+* heroku pg:info
 
 To maintain:
 
+* heroku apps:info
 * heroku ps
-* heroku open
 * heroku logs
 * heroku config[:set|unset]
+* heroku run bash
+
+## install polymer and initialize the project
+
+* install [node.js](https://nodejs.org/en/)
+* sudo npm install npm@latest -g
+* sudo npm install -g polymer-cli
+* sudo npm install -g bower
+* polymer init (optional)
+* bower init
+* bower install iron-ajax
+* polymer build (optional)

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/nosarthur/lib-app/storage"
+	"github.com/nosarthur/todo-app/storage"
 )
 
 func main() {

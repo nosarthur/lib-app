@@ -1,0 +1,17 @@
+{
+  "name": "todo-app",
+  "homepage": "https://github.com/nosarthur/todo-app",
+  "description": "todo-list",
+  "main": "index.html",
+  "authors": [
+    "Dong Zhou <zhou.dong@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
