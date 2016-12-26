@@ -4,6 +4,11 @@ This is an attempt to combine Go backend, Polymer frontend, and Slack robot into
 
 The basic data type is called `Ticket` and each `Ticket` contains multiple `Todo`s.
 
+## test
+
+* go test ./storage -v
+* go test ./server -v
+
 ## local deployment
 
 * go install ./cmd/...
