@@ -31,6 +31,7 @@ To create database
 
 * heroku addons:create heroku-postgresql:hobby-dev
 * heroku pg:info
+* heroku pg:psql
 
 To maintain:
 

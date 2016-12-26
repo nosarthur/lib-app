@@ -2,8 +2,6 @@ package storage
 
 import (
 	"time"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type Ticket struct {

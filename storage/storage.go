@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type AppDB struct {
@@ -35,7 +37,7 @@ func (adb *AppDB) GetAll() ([]Ticket, error) {
 	return tickets, rows.Err()
 }
 
-func (adb *AppDB) MustCreateTables() {
+func (adb *AppDB) MustCreateTables(dbType string, dbLoc string) {
 	schema := `
 	CREATE TABLE ticket (
 		id 			TEXT PRIMARY KEY,
@@ -52,10 +54,11 @@ func (adb *AppDB) MustCreateTables() {
 		item      TEXT NOT NULL,
 		done      INTEGER NOT NULL
 	);`
-	db := sqlx.MustConnect("sqlite3", "./app.sqlite")
+	db := sqlx.MustConnect(dbType, dbLoc)
 	_, err := db.Exec(schema)
 	if err != nil {
 		panic(err)
 	}
 	adb.db = db
+	fmt.Println("Tables created.")
 }

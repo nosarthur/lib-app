@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/nosarthur/todo-app",
+	"ImportPath": "github.com/nosarthur/todobot",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v75",
 	"Packages": [
@@ -20,6 +20,16 @@
 			"ImportPath": "github.com/jmoiron/sqlx/reflectx",
 			"Comment": "sqlx-v1.1-103-gcac998c",
 			"Rev": "cac998c4f0959c19c638c523e374fa8e4e0bcfe3"
+		},
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Comment": "go1.0-cutoff-136-g5bf1611",
+			"Rev": "5bf161122cd640c2a5a2c1d7fa49ea9befff31dd"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/oid",
+			"Comment": "go1.0-cutoff-136-g5bf1611",
+			"Rev": "5bf161122cd640c2a5a2c1d7fa49ea9befff31dd"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-sqlite3",

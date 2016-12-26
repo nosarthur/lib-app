@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/nosarthur/todo-app/storage"
+	"github.com/nosarthur/todobot/storage"
 )
 
 type Application struct {
