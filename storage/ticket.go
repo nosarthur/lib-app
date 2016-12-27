@@ -5,7 +5,7 @@ import "time"
 type Ticket struct {
 	Id        string     `db:"id" json:"id"`
 	Detail    string     `db:"detail" json:"detail"`
-	Todos     []Todo     `json:"todos"`
+	Todos     []*Todo    `json:"todos"`
 	StartTime time.Time  `db:"start_time" json:"start_time"`
 	EndTime   *time.Time `db:"end_time" json:"end_time"`
 	Priority  bool       `db:"priority" json:"priority"`

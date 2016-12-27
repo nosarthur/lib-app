@@ -40,7 +40,7 @@ func (app *Application) Get(w http.ResponseWriter, req *http.Request) error {
 		if err != nil {
 			return err
 		}
-		tickets[i].Todos = make([]storage.Todo, len(todos))
+		tickets[i].Todos = make([]*storage.Todo, len(todos))
 		copy(tickets[i].Todos, todos)
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -66,10 +66,9 @@ func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) erro
 }
 
 func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) error {
-	errMsg := fmt.Sprintf("Cannot end Ticket=%v.", t)
-
 	vars := mux.Vars(req)
 	t, err := app.db.ReadTicket(vars["id"])
+	errMsg := fmt.Sprintf("Cannot end Ticket=%v.", t)
 	if err != nil {
 		return fmt.Errorf("%v %v", errMsg, err)
 	}

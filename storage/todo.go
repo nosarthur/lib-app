@@ -46,7 +46,7 @@ func (adb *AppDB) ReadTodo(ticket_id string, idx int64) (Todo, error) {
 	return t, err
 }
 
-func (adb *AppDB) ReadTodos(ticket_id string) ([]Todo, error) {
+func (adb *AppDB) ReadTodos(ticket_id string) ([]*Todo, error) {
 	errMsg := fmt.Sprintf("Cannot read Todos with ticket_id=%v", ticket_id)
 
 	query := `SELECT * from todo WHERE ticket_id=$1`
@@ -55,13 +55,13 @@ func (adb *AppDB) ReadTodos(ticket_id string) ([]Todo, error) {
 		return nil, fmt.Errorf("%v, %v", errMsg, err)
 	}
 	defer rows.Close()
-	todos := []Todo{}
+	todos := []*Todo{}
 	for rows.Next() {
 		value := Todo{}
 		if err = rows.StructScan(&value); err != nil {
 			return nil, fmt.Errorf("%v, %v", errMsg, err)
 		}
-		todos = append(todos, value)
+		todos = append(todos, &value)
 	}
 	if rows.Err() != nil {
 		return nil, fmt.Errorf("%v, %v", errMsg, rows.Err())
