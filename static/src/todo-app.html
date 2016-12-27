@@ -12,12 +12,12 @@
       </style>
       <li><span done$={{ticket.end_time}}>
           {{ticket.id}}: {{ticket.detail}} | 
-            <span>{{_timeLapsed(ticket.start_time)}} has lapsed </span>
+            <span>{{_timeLapsed(ticket.start_time)}} </span>
           </span>
           <ol>
             <template is="dom-repeat" items="{{ticket.todos}}" as="todo">
               <li><span done$={{todo.done}}>
-                  {{todo.item}}, {{todo.done}}
+                  {{todo.item}}
                   </span>
               </li>
             </template>

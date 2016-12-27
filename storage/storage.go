@@ -39,7 +39,7 @@ func (adb *AppDB) GetAll() ([]Ticket, error) {
 func (adb *AppDB) MustCreateTables(dbLoc string) {
 	schema := `
 	CREATE TABLE ticket (
-		id 			VARCHAR(16) PRIMARY KEY,
+		id          VARCHAR(16) PRIMARY KEY,
 		detail      VARCHAR(32),
 		start_time  TIMESTAMP WITH TIME ZONE  NOT NULL,
 		end_time    TIMESTAMP WITH TIME ZONE,

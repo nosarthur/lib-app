@@ -1,9 +1,6 @@
 package storage
 
-import (
-	"fmt"
-	"time"
-)
+import "time"
 
 type Ticket struct {
 	Id        string     `db:"id" json:"id"`
@@ -27,18 +24,8 @@ func (adb *AppDB) ReadTicket(id string) (Ticket, error) {
 }
 
 func (adb *AppDB) UpdateTicket(t Ticket) error {
-	result, err := adb.db.NamedExec(`UPDATE ticket SET detail=:detail, start_time=:start_time, end_time=:end_time, priority=:priority WHERE id=:id;`, &t)
-	if err != nil {
-		return err
-	}
-	nRows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if nRows == 0 {
-		return fmt.Errorf("Ticket=%s does not exist for update", t)
-	}
-	return nil
+	_, err := adb.db.NamedExec(`UPDATE ticket SET detail=:detail, start_time=:start_time, end_time=:end_time, priority=:priority WHERE id=:id;`, &t)
+	return err
 }
 
 func (adb *AppDB) DeleteTicket(id string) error {

@@ -18,19 +18,19 @@ func (adb *AppDB) getTodoCount(ticket_id string) (int64, error) {
 
 // CreateTodo sets Todo.Id and Todo.Idx automatically
 func (adb *AppDB) CreateTodo(t Todo) error {
-	errMsg := fmt.Sprintf("Cannot create Todo %v", t)
+	errMsg := fmt.Sprintf("Cannot create Todo=%v", t)
 
 	if _, err := adb.ReadTicket(t.TicketId); err != nil {
-		return fmt.Errorf("%v, %v", errMsg, err.Error())
+		return fmt.Errorf("%v, %v", errMsg, err)
 	}
 	count, err := adb.getTodoCount(t.TicketId)
 	if err != nil {
-		return fmt.Errorf("%v, %v", errMsg, err.Error())
+		return fmt.Errorf("%v, %v", errMsg, err)
 	}
 	t.Idx = count + 1
 	_, err = adb.db.NamedExec("INSERT INTO todo (idx, item, ticket_id, done) VALUES (:idx, :item, :ticket_id, :done)", &t)
 	if err != nil {
-		return fmt.Errorf("%v, %v", errMsg, err.Error())
+		return fmt.Errorf("%v, %v", errMsg, err)
 	}
 	return nil
 }
@@ -41,7 +41,7 @@ func (adb *AppDB) ReadTodo(ticket_id string, idx int64) (Todo, error) {
 	query := `SELECT * from todo WHERE ticket_id=$1 AND idx=$2`
 	err := adb.db.Get(&t, query, ticket_id, idx)
 	if err != nil {
-		err = fmt.Errorf("%v, %v", errMsg, err.Error())
+		err = fmt.Errorf("%v, %v", errMsg, err)
 	}
 	return t, err
 }
@@ -52,37 +52,27 @@ func (adb *AppDB) ReadTodos(ticket_id string) ([]Todo, error) {
 	query := `SELECT * from todo WHERE ticket_id=$1`
 	rows, err := adb.db.Queryx(query, ticket_id)
 	if err != nil {
-		return nil, fmt.Errorf("%v, %v", errMsg, err.Error())
+		return nil, fmt.Errorf("%v, %v", errMsg, err)
 	}
 	defer rows.Close()
 	todos := []Todo{}
 	for rows.Next() {
 		value := Todo{}
 		if err = rows.StructScan(&value); err != nil {
-			return nil, fmt.Errorf("%v, %v", errMsg, err.Error())
+			return nil, fmt.Errorf("%v, %v", errMsg, err)
 		}
 		todos = append(todos, value)
 	}
 	if rows.Err() != nil {
-		return nil, fmt.Errorf("%v, %v", errMsg, rows.Err().Error())
+		return nil, fmt.Errorf("%v, %v", errMsg, rows.Err())
 	}
 	return todos, nil
 }
 
 // UpdateTodo relies on the ticket_id and idx
 func (adb *AppDB) UpdateTodo(t Todo) error {
-	result, err := adb.db.NamedExec(`UPDATE todo SET item=:item, done=:done WHERE ticket_id=:ticket_id AND idx=:idx;`, &t)
-	if err != nil {
-		return err
-	}
-	nRows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if nRows == 0 {
-		return fmt.Errorf("Todo=%s does not exist for update", t)
-	}
-	return nil
+	_, err := adb.db.NamedExec(`UPDATE todo SET item=:item, done=:done WHERE ticket_id=:ticket_id AND idx=:idx;`, &t)
+	return err
 }
 
 // DeleteTodo relies on the ticket_id and idx

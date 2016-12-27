@@ -66,21 +66,23 @@ func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) erro
 }
 
 func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) error {
+	errMsg := fmt.Sprintf("Cannot end Ticket=%v.", t)
+
 	vars := mux.Vars(req)
 	t, err := app.db.ReadTicket(vars["id"])
 	if err != nil {
-		return err
+		return fmt.Errorf("%v %v", errMsg, err)
 	}
 	if t.EndTime != nil {
-		return fmt.Errorf("Cannot end Ticket:%s. It has ended already.", t)
+		return fmt.Errorf("%v It has ended already.", errMsg)
 	}
 	now := time.Now()
 	if now.Before(t.StartTime) {
-		return fmt.Errorf("Cannot end Ticket:%s. Causality broken.", t)
+		return fmt.Errorf("%v Causality broken.", errMsg)
 	}
 	t.EndTime = &now
 	if err = app.db.UpdateTicket(t); err != nil {
-		return err
+		return fmt.Errorf("%v %v", errMsg, err)
 	}
 	return nil
 }
