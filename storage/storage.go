@@ -4,14 +4,15 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type AppDB struct {
 	db *sqlx.DB
 }
 
-func (adb *AppDB) MustInit() {
-	adb.db = sqlx.MustConnect("sqlite3", "./app.sqlite")
+func (adb *AppDB) MustInit(dbLoc string) {
+	adb.db = sqlx.MustConnect("postgres", dbLoc)
 	fmt.Println("database connected.")
 }
 
@@ -35,27 +36,30 @@ func (adb *AppDB) GetAll() ([]Ticket, error) {
 	return tickets, rows.Err()
 }
 
-func (adb *AppDB) MustCreateTables() {
+func (adb *AppDB) MustCreateTables(dbLoc string) {
 	schema := `
 	CREATE TABLE ticket (
-		id 			TEXT PRIMARY KEY,
-		detail      TEXT,
-		start_time  DATETIME NOT NULL,
-		end_time    DATETIME,
-		priority    INTEGER NOT NULL
+		id          VARCHAR(16) PRIMARY KEY,
+		detail      VARCHAR(32),
+		start_time  TIMESTAMP WITH TIME ZONE  NOT NULL,
+		end_time    TIMESTAMP WITH TIME ZONE,
+		priority    BOOLEAN NOT NULL
 	);
 
 	CREATE TABLE todo (
-		id        INTEGER PRIMARY KEY AUTOINCREMENT,
-		ticket_id TEXT NOT NULL,
+		id        SERIAL PRIMARY KEY,
+		ticket_id VARCHAR(16) NOT NULL,
 		idx       INTEGER NOT NULL,
-		item      TEXT NOT NULL,
-		done      INTEGER NOT NULL
+		item      VARCHAR(32) NOT NULL,
+		done      BOOLEAN NOT NULL
 	);`
-	db := sqlx.MustConnect("sqlite3", "./app.sqlite")
-	_, err := db.Exec(schema)
-	if err != nil {
-		panic(err)
-	}
+	db := sqlx.MustConnect("postgres", dbLoc)
+	db.MustExec(schema)
 	adb.db = db
+	fmt.Println("Tables created.")
+}
+
+func (adb *AppDB) MustDropTables() {
+	adb.db.MustExec(`DROP TABLE ticket; DROP TABLE todo;`)
+	fmt.Println("Tables dropped.")
 }

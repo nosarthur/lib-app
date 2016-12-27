@@ -1,10 +1,6 @@
 package storage
 
-import (
-	"time"
-
-	_ "github.com/mattn/go-sqlite3"
-)
+import "time"
 
 type Ticket struct {
 	Id        string     `db:"id" json:"id"`
@@ -22,12 +18,9 @@ func (adb *AppDB) CreateTicket(t Ticket) error {
 
 func (adb *AppDB) ReadTicket(id string) (Ticket, error) {
 	t := Ticket{}
-	query := `SELECT * FROM ticket WHERE id=?`
+	query := `SELECT * FROM ticket WHERE id=$1`
 	err := adb.db.Get(&t, query, id)
-	if err != nil {
-		return t, err
-	}
-	return t, nil
+	return t, err
 }
 
 func (adb *AppDB) UpdateTicket(t Ticket) error {
@@ -35,6 +28,7 @@ func (adb *AppDB) UpdateTicket(t Ticket) error {
 	return err
 }
 
-func (adb *AppDB) DeleteTicket(t Ticket) error {
-	return nil
+func (adb *AppDB) DeleteTicket(id string) error {
+	_, err := adb.db.Exec(`DELETE FROM ticket WHERE id=$1;`, id)
+	return err
 }

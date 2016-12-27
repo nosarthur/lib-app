@@ -2,13 +2,14 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/nosarthur/todo-app/storage"
+	"github.com/nosarthur/todobot/storage"
 )
 
 type Application struct {
@@ -17,7 +18,7 @@ type Application struct {
 
 func NewApplication() *Application {
 	var app Application
-	app.db.MustInit()
+	app.db.MustInit(os.Getenv("DATABASE_URL"))
 	return &app
 }
 
@@ -65,21 +66,23 @@ func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) erro
 }
 
 func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) error {
+	errMsg := fmt.Sprintf("Cannot end Ticket=%v.", t)
+
 	vars := mux.Vars(req)
 	t, err := app.db.ReadTicket(vars["id"])
 	if err != nil {
-		return err
+		return fmt.Errorf("%v %v", errMsg, err)
 	}
 	if t.EndTime != nil {
-		return errors.New("It's alread ended.")
+		return fmt.Errorf("%v It has ended already.", errMsg)
 	}
 	now := time.Now()
 	if now.Before(t.StartTime) {
-		return errors.New("End time ealier than start time")
+		return fmt.Errorf("%v Causality broken.", errMsg)
 	}
 	t.EndTime = &now
 	if err = app.db.UpdateTicket(t); err != nil {
-		return err
+		return fmt.Errorf("%v %v", errMsg, err)
 	}
 	return nil
 }
