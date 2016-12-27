@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -20,19 +21,27 @@ func (adb *AppDB) CreateTicket(t Ticket) error {
 
 func (adb *AppDB) ReadTicket(id string) (Ticket, error) {
 	t := Ticket{}
-	query := `SELECT * FROM ticket WHERE id=?`
+	query := `SELECT * FROM ticket WHERE id=$1`
 	err := adb.db.Get(&t, query, id)
-	if err != nil {
-		return t, err
-	}
-	return t, nil
+	return t, err
 }
 
 func (adb *AppDB) UpdateTicket(t Ticket) error {
-	_, err := adb.db.NamedExec(`UPDATE ticket SET detail=:detail, start_time=:start_time, end_time=:end_time, priority=:priority WHERE id=:id;`, &t)
-	return err
+	result, err := adb.db.NamedExec(`UPDATE ticket SET detail=:detail, start_time=:start_time, end_time=:end_time, priority=:priority WHERE id=:id;`, &t)
+	if err != nil {
+		return err
+	}
+	nRows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if nRows == 0 {
+		return fmt.Errorf("Ticket:%s does not exist for update", t)
+	}
+	return nil
 }
 
-func (adb *AppDB) DeleteTicket(t Ticket) error {
-	return nil
+func (adb *AppDB) DeleteTicket(id string) error {
+	_, err := adb.db.Exec(`DELETE FROM ticket WHERE id=$1;`, id)
+	return err
 }

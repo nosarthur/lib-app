@@ -2,7 +2,7 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -71,11 +71,11 @@ func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) erro
 		return err
 	}
 	if t.EndTime != nil {
-		return errors.New("It's alread ended.")
+		return fmt.Errorf("Cannot end Ticket:%s. It has ended already.", t)
 	}
 	now := time.Now()
 	if now.Before(t.StartTime) {
-		return errors.New("End time ealier than start time")
+		return fmt.Errorf("Cannot end Ticket:%s. Causality broken.", t)
 	}
 	t.EndTime = &now
 	if err = app.db.UpdateTicket(t); err != nil {
