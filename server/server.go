@@ -28,7 +28,7 @@ type AppHandler func(http.ResponseWriter, *http.Request) error
 func (fn AppHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := fn(w, req); err != nil {
 		log.Println(err)
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 

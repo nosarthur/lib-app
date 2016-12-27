@@ -2,7 +2,6 @@
 
 <dom-module id="todo-app">
   <template>
-    <p>hello, nos!</p>
     <ul>
     <template is="dom-repeat" items="[[reply.tickets]]" as="ticket">
       <style>
@@ -11,7 +10,8 @@
         }
       </style>
       <li><span done$={{ticket.end_time}}>
-          {{ticket.id}}: {{ticket.detail}} | 
+          {{ticket.id}}: {{ticket.detail}} 
+            <paper-icon-button icon="update"></paper-icon-button>
             <span>{{_timeLapsed(ticket.start_time)}} </span>
           </span>
           <ol>

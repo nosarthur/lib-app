@@ -32,14 +32,15 @@ To create database
 * heroku addons:create heroku-postgresql:hobby-dev
 * heroku pg:info
 * heroku pg:psql
+* heroku run bash
+    * initTodobotDB
 
 To maintain:
 
 * heroku apps:info
 * heroku ps
-* heroku logs
+* heroku logs --tail
 * heroku config[:set|unset]
-* heroku run bash
 
 ## install polymer and initialize the project
 
