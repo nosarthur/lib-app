@@ -36,7 +36,7 @@ func (adb *AppDB) UpdateTicket(t Ticket) error {
 		return err
 	}
 	if nRows == 0 {
-		return fmt.Errorf("Ticket:%s does not exist for update", t)
+		return fmt.Errorf("Ticket=%s does not exist for update", t)
 	}
 	return nil
 }

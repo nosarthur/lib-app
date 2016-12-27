@@ -51,7 +51,7 @@ func (adb *AppDB) MustCreateTables(dbLoc string) {
 		ticket_id VARCHAR(16) NOT NULL,
 		idx       INTEGER NOT NULL,
 		item      VARCHAR(32) NOT NULL,
-		done      INTEGER NOT NULL
+		done      BOOLEAN NOT NULL
 	);`
 	db := sqlx.MustConnect("postgres", dbLoc)
 	db.MustExec(schema)

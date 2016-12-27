@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -17,7 +18,7 @@ type Application struct {
 
 func NewApplication() *Application {
 	var app Application
-	app.db.MustInit()
+	app.db.MustInit(os.Getenv("DATABASE_URL"))
 	return &app
 }
 
