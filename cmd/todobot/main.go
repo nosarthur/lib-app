@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +12,6 @@ import (
 func main() {
 	app := server.NewApplication()
 
-	fmt.Println("start listening...")
 	router := mux.NewRouter().StrictSlash(true)
 
 	ticket := router.PathPrefix("/ticket").Subrouter()
@@ -27,5 +25,6 @@ func main() {
 	router.Handle("/data", server.AppHandler(app.Get)).Methods("GET")
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
+	log.Println("start listening...")
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
 }

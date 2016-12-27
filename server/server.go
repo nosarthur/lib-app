@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,10 +27,27 @@ type AppHandler func(http.ResponseWriter, *http.Request) error
 
 func (fn AppHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := fn(w, req); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), 500)
 	}
 }
 
+/*
+	REST API HTTP handler http:get:: /data
+
+	Example response:
+
+	{
+		"tickets" :[ {"id":"grocery",
+		              "detail":"vegi",
+					  "todos": []
+					  "start_time": 2016-12-27T05:30:34.645428Z",
+					  "end_time":null,
+					  "priority":false}
+		]
+	}
+
+*/
 func (app *Application) Get(w http.ResponseWriter, req *http.Request) error {
 	tickets, err := app.db.GetAll()
 	if err != nil {
@@ -53,6 +71,7 @@ func (app *Application) Get(w http.ResponseWriter, req *http.Request) error {
 	return nil
 }
 
+// http:post::/ticket/add/
 func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) error {
 	t := storage.Ticket{StartTime: time.Now()}
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
@@ -65,6 +84,7 @@ func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) erro
 	return nil
 }
 
+// http:delete::/ticket/end/id
 func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 	t, err := app.db.ReadTicket(vars["id"])
@@ -86,6 +106,7 @@ func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) erro
 	return nil
 }
 
+// http:post::/todo/add
 func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) error {
 	t := storage.Todo{}
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
@@ -98,10 +119,10 @@ func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) error 
 	return nil
 }
 
+// http:delete::/todo/ticket_id/idx
 func (app *Application) EndTodo(w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
-	_, err := app.db.ReadTicket(vars["ticket_id"])
-	if err != nil {
+	if _, err := app.db.ReadTicket(vars["ticket_id"]); err != nil {
 		return err
 	}
 	idx, err := strconv.ParseInt(vars["idx"], 10, 64)

@@ -1,7 +1,11 @@
+/*
+	CRUD for Ticket and Todo
+*/
+
 package storage
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -13,9 +17,11 @@ type AppDB struct {
 
 func (adb *AppDB) MustInit(dbLoc string) {
 	adb.db = sqlx.MustConnect("postgres", dbLoc)
-	fmt.Println("database connected.")
+	log.Println("database connected.")
 }
 
+// GetAll returns all tickets in the database
+// the todos are not included
 func (adb *AppDB) GetAll() ([]Ticket, error) {
 	rows, err := adb.db.Queryx("SELECT * FROM ticket")
 	if err != nil {
@@ -32,7 +38,6 @@ func (adb *AppDB) GetAll() ([]Ticket, error) {
 		}
 		tickets = append(tickets, i)
 	}
-
 	return tickets, rows.Err()
 }
 
@@ -56,10 +61,10 @@ func (adb *AppDB) MustCreateTables(dbLoc string) {
 	db := sqlx.MustConnect("postgres", dbLoc)
 	db.MustExec(schema)
 	adb.db = db
-	fmt.Println("Tables created.")
+	log.Println("Tables created.")
 }
 
 func (adb *AppDB) MustDropTables() {
 	adb.db.MustExec(`DROP TABLE ticket; DROP TABLE todo;`)
-	fmt.Println("Tables dropped.")
+	log.Println("Tables dropped.")
 }
