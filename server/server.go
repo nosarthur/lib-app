@@ -33,7 +33,9 @@ func (fn AppHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-	REST API HTTP handler http:get:: /data
+	REST API without authentication
+
+	http:get:: /data
 
 	Example response:
 

@@ -1,5 +1,7 @@
 # web application of TODO list
 
+[![Build Status](https://travis-ci.org/nosarthur/todobot.svg?branch=master)](https://travis-ci.org/nosarthur/todobot)
+
 This is an attempt to combine Go backend, Polymer frontend, and Slack robot into a todo list app.
 
 The basic data type is called `Ticket` and each `Ticket` contains multiple `Todo`s.

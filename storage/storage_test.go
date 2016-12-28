@@ -14,7 +14,7 @@ import (
 var adb AppDB
 
 func setupDB() {
-	adb.MustCreateTables("postgresql://localhost?sslmode=disable")
+	adb.MustCreateTables("postgresql://localhost/travis_ci_test?sslmode=disable")
 }
 
 func teardownDB() {
