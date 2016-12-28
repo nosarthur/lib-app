@@ -4,6 +4,11 @@ go:
   - 1.7.3
 services:
   - postgresql
+branches:
+  only:
+    - master
 
 before_script:
   - "psql -c 'create database travis_ci_test;' -U postgres"
+script: go test ./storage ./server
+
