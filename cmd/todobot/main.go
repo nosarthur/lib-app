@@ -5,25 +5,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
 	"github.com/nosarthur/todobot/server"
 )
 
 func main() {
 	app := server.NewApplication()
-
-	router := mux.NewRouter().StrictSlash(true)
-
-	ticket := router.PathPrefix("/ticket").Subrouter()
-	ticket.Handle("/add", server.AppHandler(app.AddTicket)).Methods("POST")
-	ticket.Handle("/end/{id}", server.AppHandler(app.EndTicket)).Methods("DELETE")
-
-	todo := router.PathPrefix("/todo").Subrouter()
-	todo.Handle("/add", server.AppHandler(app.AddTodo)).Methods("POST")
-	todo.Handle("/end/{ticket_id}/{idx}", server.AppHandler(app.EndTodo)).Methods("DELETE")
-
-	router.Handle("/data", server.AppHandler(app.Get)).Methods("GET")
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
+	router := server.NewRouter(app)
 
 	log.Println("start listening...")
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))

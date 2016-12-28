@@ -13,23 +13,40 @@ import (
 	"github.com/nosarthur/todobot/storage"
 )
 
-type Application struct {
-	db storage.AppDB
-}
+type appHandler func(http.ResponseWriter, *http.Request) error
 
-func NewApplication() *Application {
-	var app Application
-	app.db.MustInit(os.Getenv("DATABASE_URL"))
-	return &app
-}
-
-type AppHandler func(http.ResponseWriter, *http.Request) error
-
-func (fn AppHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (fn appHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := fn(w, req); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+type application struct {
+	db storage.AppDB
+}
+
+func NewApplication() *application {
+	var app application
+	app.db.MustInit(os.Getenv("DATABASE_URL"))
+	return &app
+}
+
+func NewRouter(app *application) *mux.Router {
+	router := mux.NewRouter().StrictSlash(true)
+
+	ticket := router.PathPrefix("/ticket").Subrouter()
+	ticket.Handle("/add", appHandler(app.AddTicket)).Methods("POST")
+	ticket.Handle("/end/{id}", appHandler(app.EndTicket)).Methods("DELETE")
+
+	todo := router.PathPrefix("/todo").Subrouter()
+	todo.Handle("/add", appHandler(app.AddTodo)).Methods("POST")
+	todo.Handle("/end/{ticket_id}/{idx}", appHandler(app.EndTodo)).Methods("DELETE")
+
+	router.Handle("/data", appHandler(app.Get)).Methods("GET")
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
+
+	return router
 }
 
 /*
@@ -50,7 +67,7 @@ func (fn AppHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 */
-func (app *Application) Get(w http.ResponseWriter, req *http.Request) error {
+func (app *application) Get(w http.ResponseWriter, req *http.Request) error {
 	tickets, err := app.db.GetAll()
 	if err != nil {
 		return err
@@ -74,7 +91,7 @@ func (app *Application) Get(w http.ResponseWriter, req *http.Request) error {
 }
 
 // http:post::/ticket/add/
-func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) error {
+func (app *application) AddTicket(w http.ResponseWriter, req *http.Request) error {
 	t := storage.Ticket{StartTime: time.Now()}
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
 		return err
@@ -87,7 +104,7 @@ func (app *Application) AddTicket(w http.ResponseWriter, req *http.Request) erro
 }
 
 // http:delete::/ticket/end/id
-func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) error {
+func (app *application) EndTicket(w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 	t, err := app.db.ReadTicket(vars["id"])
 	errMsg := fmt.Sprintf("Cannot end Ticket=%v.", t)
@@ -109,7 +126,7 @@ func (app *Application) EndTicket(w http.ResponseWriter, req *http.Request) erro
 }
 
 // http:post::/todo/add
-func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) error {
+func (app *application) AddTodo(w http.ResponseWriter, req *http.Request) error {
 	t := storage.Todo{}
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
 		return err
@@ -122,7 +139,7 @@ func (app *Application) AddTodo(w http.ResponseWriter, req *http.Request) error 
 }
 
 // http:delete::/todo/ticket_id/idx
-func (app *Application) EndTodo(w http.ResponseWriter, req *http.Request) error {
+func (app *application) EndTodo(w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 	if _, err := app.db.ReadTicket(vars["ticket_id"]); err != nil {
 		return err
