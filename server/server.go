@@ -4,25 +4,34 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
-	"time"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/nosarthur/todobot/storage"
 )
 
+// appHandler decorates the http handlers with logging
 type appHandler func(http.ResponseWriter, *http.Request) error
 
-// ServerHTTP handles error and server log
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := fn(w, req); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+// authHandler decorates the http handlers with authentication and logging
+func authHandler(f func(http.ResponseWriter, *http.Request) error) appHandler {
+	authf := func(w http.ResponseWriter, req *http.Request) error {
+		if req.Header.Get("Token") != os.Getenv("Token") {
+			return fmt.Errorf("Authentication failed.")
+		}
+		return f(w, req)
+	}
+	return appHandler(authf)
 }
 
 type application struct {
@@ -40,128 +49,19 @@ func NewApplication(dbURL string) *application {
 func NewRouter(app *application) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
+	// these four handlers require authentication
 	ticket := router.PathPrefix("/ticket").Subrouter()
-	ticket.Handle("/add", appHandler(app.AddTicket)).Methods("POST")
-	ticket.Handle("/end/{id}", appHandler(app.EndTicket)).Methods("DELETE")
+	ticket.Handle("/add", authHandler(app.AddTicket)).Methods("POST")
+	ticket.Handle("/end/{id}", authHandler(app.EndTicket)).Methods("DELETE")
 
 	todo := router.PathPrefix("/todo").Subrouter()
-	todo.Handle("/add", appHandler(app.AddTodo)).Methods("POST")
-	todo.Handle("/end/{ticket_id}/{idx}", appHandler(app.EndTodo)).Methods("DELETE")
+	todo.Handle("/add", authHandler(app.AddTodo)).Methods("POST")
+	todo.Handle("/end/{ticket_id}/{idx}", authHandler(app.EndTodo)).Methods("DELETE")
 
-	router.Handle("/data", appHandler(app.Get)).Methods("GET")
+	// these two handlers do not require authentication
+	router.Handle("/data", appHandler(app.Data)).Methods("GET")
+	router.Handle("/slack", appHandler(app.Slack)).Methods("POST")
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
 	return router
-}
-
-/*
-	REST API without authentication
-
-	http:get:: /data
-
-	Example response:
-
-	{
-		"tickets" :[ {"id":"grocery",
-		              "detail":"vegi",
-					  "todos": []
-					  "start_time": 2016-12-27T05:30:34.645428Z",
-					  "end_time":null,
-					  "priority":false}
-		]
-	}
-
-*/
-func (app *application) Get(w http.ResponseWriter, req *http.Request) error {
-	tickets, err := app.db.GetAll()
-	if err != nil {
-		return err
-	}
-	for i, t := range tickets {
-		todos, err := app.db.ReadTodos(t.Id)
-		if err != nil {
-			return err
-		}
-		tickets[i].Todos = make([]*storage.Todo, len(todos))
-		copy(tickets[i].Todos, todos)
-	}
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	reply := map[string]interface{}{
-		"tickets": tickets,
-	}
-	if err := json.NewEncoder(w).Encode(reply); err != nil {
-		return err
-	}
-	return nil
-}
-
-// AddTicket handles request of http:post::/ticket/add/
-func (app *application) AddTicket(w http.ResponseWriter, req *http.Request) error {
-	t := storage.Ticket{StartTime: time.Now()}
-	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
-		return err
-	}
-	if err := app.db.CreateTicket(t); err != nil {
-		return err
-	}
-	w.WriteHeader(http.StatusCreated)
-	return nil
-}
-
-// EndTicket handles request of http:delete::/ticket/end/id
-func (app *application) EndTicket(w http.ResponseWriter, req *http.Request) error {
-	vars := mux.Vars(req)
-	t, err := app.db.ReadTicket(vars["id"])
-	errMsg := fmt.Sprintf("Cannot end Ticket with id=%v.", vars["id"])
-	if err != nil {
-		return fmt.Errorf("%v %v", errMsg, err)
-	}
-	if t.EndTime != nil {
-		return fmt.Errorf("%v It has ended already.", errMsg)
-	}
-	now := time.Now()
-	if now.Before(t.StartTime) {
-		return fmt.Errorf("%v Causality broken.", errMsg)
-	}
-	t.EndTime = &now
-	if err = app.db.UpdateTicket(t); err != nil {
-		return fmt.Errorf("%v %v", errMsg, err)
-	}
-	w.WriteHeader(http.StatusAccepted)
-	return nil
-}
-
-// Addtodo handles request of http:post::/todo/add
-func (app *application) AddTodo(w http.ResponseWriter, req *http.Request) error {
-	t := storage.Todo{}
-	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
-		return err
-	}
-	if err := app.db.CreateTodo(t); err != nil {
-		return err
-	}
-	w.WriteHeader(http.StatusCreated)
-	return nil
-}
-
-// EndTodo handles request of http:delete::/todo/ticket_id/idx
-func (app *application) EndTodo(w http.ResponseWriter, req *http.Request) error {
-	vars := mux.Vars(req)
-	if _, err := app.db.ReadTicket(vars["ticket_id"]); err != nil {
-		return err
-	}
-	idx, err := strconv.ParseInt(vars["idx"], 10, 64)
-	if err != nil {
-		return err
-	}
-	t, err := app.db.ReadTodo(vars["ticket_id"], idx)
-	if err != nil {
-		return err
-	}
-	t.Done = true
-	if err = app.db.UpdateTodo(t); err != nil {
-		return err
-	}
-	w.WriteHeader(http.StatusAccepted)
-	return nil
 }

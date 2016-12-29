@@ -2,9 +2,9 @@ package server
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -15,7 +15,6 @@ import (
 var (
 	app    *application
 	server *httptest.Server
-	reader io.Reader
 )
 
 func setup() {
@@ -31,95 +30,75 @@ func teardown() {
 	server.Close()
 }
 
+func makeRequest(t *testing.T, url string, method string, body string) *http.Request {
+	reader := &strings.Reader{}
+	if body != "" {
+		reader = strings.NewReader(body)
+	}
+	req, err := http.NewRequest(method, url, reader)
+	assert.Nil(t, err)
+	req.Header.Set("Token", os.Getenv("Token"))
+	return req
+}
+
+func runRequest(t *testing.T, req *http.Request, expectedCode int) {
+	resp, err := http.DefaultClient.Do(req)
+	assert.Nil(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, expectedCode, resp.StatusCode)
+}
+
 func TestServer(t *testing.T) {
 	setup()
 	t.Run("AddTicket", func(t *testing.T) {
 		url := server.URL + "/ticket/add"
-		reader = strings.NewReader(`{"id": "test1", "detail": "test1"}`)
-		req, err := http.NewRequest("POST", url, reader)
-		assert.Nil(t, err)
-		resp, err := http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		req := makeRequest(t, url, "POST", `{"id": "test1", "detail": "test1"}`)
+		runRequest(t, req, http.StatusCreated)
 		// add a ticket with same id
-		reader = strings.NewReader(`{"id": "test1"}`)
-		req, err = http.NewRequest("POST", url, reader)
-		assert.Nil(t, err)
-		resp, err = http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		req = makeRequest(t, url, "POST", `{"id": "test1"}`)
+		runRequest(t, req, http.StatusInternalServerError)
 		// add another ticket
-		reader = strings.NewReader(`{"id": "test2", "detail": "test2"}`)
-		req, err = http.NewRequest("POST", url, reader)
-		assert.Nil(t, err)
-		resp, err = http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		req = makeRequest(t, url, "POST", `{"id": "test2", "detail": "test2"}`)
+		runRequest(t, req, http.StatusCreated)
 	})
 	t.Run("EndTicket", func(t *testing.T) {
 		url := server.URL + "/ticket/end/test1"
-		req, err := http.NewRequest("DELETE", url, nil)
-		assert.Nil(t, err)
-		resp, err := http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
+		req := makeRequest(t, url, "DELETE", "")
+		runRequest(t, req, http.StatusAccepted)
 		// end a non-existing ticket
 		url = server.URL + "/ticket/end/test100"
-		req, err = http.NewRequest("DELETE", url, nil)
-		assert.Nil(t, err)
-		resp, err = http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		req = makeRequest(t, url, "DELETE", "")
+		runRequest(t, req, http.StatusInternalServerError)
 	})
 	t.Run("AddTodo", func(t *testing.T) {
 		url := server.URL + "/todo/add"
-		reader = strings.NewReader(`{"ticket_id": "test1", "item": "todo1"}`)
-		req, err := http.NewRequest("POST", url, reader)
-		assert.Nil(t, err)
-		resp, err := http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		req := makeRequest(t, url, "POST", `{"ticket_id": "test1", "item": "todo1"}`)
+		runRequest(t, req, http.StatusCreated)
 		// add it again
-		reader = strings.NewReader(`{"ticket_id": "test1", "item": "todo1"}`)
-		req, err = http.NewRequest("POST", url, reader)
-		assert.Nil(t, err)
-		resp, err = http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		req = makeRequest(t, url, "POST", `{"ticket_id": "test1", "item": "todo1"}`)
+		runRequest(t, req, http.StatusCreated)
 		// add another todo
-		reader = strings.NewReader(`{"ticket_id": "test2"}`)
-		req, err = http.NewRequest("POST", url, reader)
-		assert.Nil(t, err)
-		resp, err = http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		req = makeRequest(t, url, "POST", `{"ticket_id": "test2"}`)
+		runRequest(t, req, http.StatusCreated)
 		// add a todo with invalid ticket_id
-		reader = strings.NewReader(`{"ticket_id": "test200"}`)
-		req, err = http.NewRequest("POST", url, reader)
-		assert.Nil(t, err)
-		resp, err = http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		req = makeRequest(t, url, "POST", `{"ticket_id": "test200"}`)
+		runRequest(t, req, http.StatusInternalServerError)
 	})
 	t.Run("EndTodo", func(t *testing.T) {
 		url := server.URL + "/todo/end/test1/1"
-		req, err := http.NewRequest("DELETE", url, nil)
-		assert.Nil(t, err)
-		resp, err := http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
+		req := makeRequest(t, url, "DELETE", "")
+		runRequest(t, req, http.StatusAccepted)
 		// end a non-existing todo
 		url = server.URL + "/todo/end/test100/1"
-		req, err = http.NewRequest("DELETE", url, nil)
-		assert.Nil(t, err)
-		resp, err = http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		req = makeRequest(t, url, "DELETE", "")
+		runRequest(t, req, http.StatusInternalServerError)
 	})
-	t.Run("Get", func(t *testing.T) {
+	t.Run("Data", func(t *testing.T) {
 		url := server.URL + "/data"
 		resp, err := http.DefaultClient.Get(url)
 		assert.Nil(t, err)
+		defer resp.Body.Close()
+
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Equal(t, "application/json; charset=UTF-8", resp.Header.Get("Content-Type"))
 		type data struct {

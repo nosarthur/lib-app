@@ -25,9 +25,9 @@ func (adb *AppDB) MustInit() {
 	log.Println("database connected.")
 }
 
-// GetAll returns all tickets in the database
+// All returns all tickets in the database
 // the todos are not included
-func (adb *AppDB) GetAll() ([]Ticket, error) {
+func (adb *AppDB) All() ([]Ticket, error) {
 	rows, err := adb.db.Queryx("SELECT * FROM ticket")
 	if err != nil {
 		panic(err)
