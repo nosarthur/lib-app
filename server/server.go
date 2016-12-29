@@ -49,6 +49,7 @@ func NewRouter(app *application) *mux.Router {
 	todo.Handle("/end/{ticket_id}/{idx}", appHandler(app.EndTodo)).Methods("DELETE")
 
 	router.Handle("/data", appHandler(app.Get)).Methods("GET")
+	router.Handle("/slack", appHandler(app.Slack)).Methods("POST")
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
 	return router
