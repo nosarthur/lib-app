@@ -8,5 +8,6 @@ import (
 
 func main() {
 	db := storage.AppDB{URL: os.Getenv("DATABASE_URL")}
+	db.MustInit()
 	db.MustCreateTables()
 }

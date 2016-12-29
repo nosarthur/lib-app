@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Ticket contains Todos
 type Ticket struct {
 	Id        string     `db:"id" json:"id"`
 	Detail    string     `db:"detail" json:"detail"`

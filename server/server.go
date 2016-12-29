@@ -1,3 +1,6 @@
+/*
+	package server implements http handlers, router, and slack bot handler
+*/
 package server
 
 import (
@@ -14,6 +17,7 @@ import (
 
 type appHandler func(http.ResponseWriter, *http.Request) error
 
+// ServerHTTP handles error and server log
 func (fn appHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := fn(w, req); err != nil {
 		log.Println(err)
@@ -127,7 +131,7 @@ func (app *application) EndTicket(w http.ResponseWriter, req *http.Request) erro
 	return nil
 }
 
-// http:post::/todo/add
+// Addtodo handles request of http:post::/todo/add
 func (app *application) AddTodo(w http.ResponseWriter, req *http.Request) error {
 	t := storage.Todo{}
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
@@ -140,7 +144,7 @@ func (app *application) AddTodo(w http.ResponseWriter, req *http.Request) error 
 	return nil
 }
 
-// http:delete::/todo/ticket_id/idx
+// EndTodo handles request of http:delete::/todo/ticket_id/idx
 func (app *application) EndTodo(w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 	if _, err := app.db.ReadTicket(vars["ticket_id"]); err != nil {

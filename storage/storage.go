@@ -1,20 +1,22 @@
 /*
-	package storage implements CRUD for Ticket and Todo
+	package storage implements CRUD for data types Ticket and Todo
 */
 
 package storage
 
 import (
 	"log"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-//
+// AppDB contains information of the database
 type AppDB struct {
-	db  *sqlx.DB
-	URL string
+	db         *sqlx.DB
+	URL        string
+	LastUpdate time.Time
 }
 
 // MustInit connects to the database
@@ -52,16 +54,13 @@ func (adb *AppDB) MustCreateTables() {
 		detail      VARCHAR(32),
 		start_time  TIMESTAMP WITH TIME ZONE  NOT NULL,
 		end_time    TIMESTAMP WITH TIME ZONE,
-		priority    BOOLEAN NOT NULL
-	);
-
+		priority    BOOLEAN NOT NULL);
 	CREATE TABLE todo (
 		id        SERIAL PRIMARY KEY,
 		ticket_id VARCHAR(16) NOT NULL,
 		idx       INTEGER NOT NULL,
 		item      VARCHAR(32) NOT NULL,
-		done      BOOLEAN NOT NULL
-	);`
+		done      BOOLEAN NOT NULL);`
 	adb.db.MustExec(schema)
 	log.Println("Tables created.")
 }
