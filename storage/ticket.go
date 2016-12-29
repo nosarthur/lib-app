@@ -1,6 +1,9 @@
 package storage
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Ticket struct {
 	Id        string     `db:"id" json:"id"`
@@ -12,8 +15,12 @@ type Ticket struct {
 }
 
 func (adb *AppDB) CreateTicket(t Ticket) error {
+	errMsg := fmt.Sprintf("Cannot create Ticket=%v", t)
 	_, err := adb.db.NamedExec("INSERT INTO ticket (id, detail, start_time, priority) VALUES (:id, :detail, :start_time, :priority)", &t)
-	return err
+	if err != nil {
+		return fmt.Errorf("%v, %v", errMsg, err)
+	}
+	return nil
 }
 
 func (adb *AppDB) ReadTicket(id string) (Ticket, error) {

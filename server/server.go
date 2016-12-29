@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -26,12 +25,14 @@ type application struct {
 	db storage.AppDB
 }
 
-func NewApplication() *application {
-	var app application
-	app.db.MustInit(os.Getenv("DATABASE_URL"))
+// NewApplication creates a new application with the associated database initialized
+func NewApplication(dbURL string) *application {
+	app := application{db: storage.AppDB{URL: dbURL}}
+	app.db.MustInit()
 	return &app
 }
 
+// NewRouter sets up the routes for the web application
 func NewRouter(app *application) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -90,24 +91,24 @@ func (app *application) Get(w http.ResponseWriter, req *http.Request) error {
 	return nil
 }
 
-// http:post::/ticket/add/
+// AddTicket handles request of http:post::/ticket/add/
 func (app *application) AddTicket(w http.ResponseWriter, req *http.Request) error {
 	t := storage.Ticket{StartTime: time.Now()}
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
 		return err
 	}
-	w.WriteHeader(http.StatusCreated)
 	if err := app.db.CreateTicket(t); err != nil {
 		return err
 	}
+	w.WriteHeader(http.StatusCreated)
 	return nil
 }
 
-// http:delete::/ticket/end/id
+// EndTicket handles request of http:delete::/ticket/end/id
 func (app *application) EndTicket(w http.ResponseWriter, req *http.Request) error {
 	vars := mux.Vars(req)
 	t, err := app.db.ReadTicket(vars["id"])
-	errMsg := fmt.Sprintf("Cannot end Ticket=%v.", t)
+	errMsg := fmt.Sprintf("Cannot end Ticket with id=%v.", vars["id"])
 	if err != nil {
 		return fmt.Errorf("%v %v", errMsg, err)
 	}
@@ -122,6 +123,7 @@ func (app *application) EndTicket(w http.ResponseWriter, req *http.Request) erro
 	if err = app.db.UpdateTicket(t); err != nil {
 		return fmt.Errorf("%v %v", errMsg, err)
 	}
+	w.WriteHeader(http.StatusAccepted)
 	return nil
 }
 
@@ -131,10 +133,10 @@ func (app *application) AddTodo(w http.ResponseWriter, req *http.Request) error 
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
 		return err
 	}
-	w.WriteHeader(http.StatusCreated)
 	if err := app.db.CreateTodo(t); err != nil {
 		return err
 	}
+	w.WriteHeader(http.StatusCreated)
 	return nil
 }
 
@@ -156,5 +158,6 @@ func (app *application) EndTodo(w http.ResponseWriter, req *http.Request) error 
 	if err = app.db.UpdateTodo(t); err != nil {
 		return err
 	}
+	w.WriteHeader(http.StatusAccepted)
 	return nil
 }

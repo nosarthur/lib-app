@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	app := server.NewApplication()
+	app := server.NewApplication(os.Getenv("DATABASE_URL"))
 	router := server.NewRouter(app)
 
 	log.Println("start listening...")

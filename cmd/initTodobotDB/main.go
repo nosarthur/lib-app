@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	var db storage.AppDB
-	db.MustCreateTables(os.Getenv("DATABASE_URL"))
+	db := storage.AppDB{URL: os.Getenv("DATABASE_URL")}
+	db.MustCreateTables()
 }

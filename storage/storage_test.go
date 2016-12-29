@@ -11,13 +11,12 @@ import (
 	Database testing is performed on local postgres database.
 */
 
-var (
-	adb AppDB
-	err error
-)
+var adb = AppDB{URL: "postgresql://localhost/travis_ci_test?sslmode=disable"}
 
 func setupDB() {
-	adb.MustCreateTables("postgresql://localhost/travis_ci_test?sslmode=disable")
+	adb.MustInit()
+	adb.MustDropTables()
+	adb.MustCreateTables()
 }
 
 func teardownDB() {
@@ -30,7 +29,7 @@ func TestStorage(t *testing.T) {
 		tkt1 := Ticket{Id: "1", StartTime: time.Now()}
 		tkt2 := Ticket{Id: "2", StartTime: time.Now()}
 		tkt3 := Ticket{Id: "3", StartTime: time.Now()}
-		err = adb.CreateTicket(tkt1)
+		err := adb.CreateTicket(tkt1)
 		assert.Nil(t, err)
 		err = adb.CreateTicket(tkt2)
 		assert.Nil(t, err)
@@ -51,7 +50,7 @@ func TestStorage(t *testing.T) {
 	})
 	t.Run("UpdateTicket", func(t *testing.T) {
 		tkt := Ticket{Id: "2", Priority: true}
-		err = adb.UpdateTicket(tkt)
+		err := adb.UpdateTicket(tkt)
 		assert.Nil(t, err)
 		tkt2, err := adb.ReadTicket("2")
 		assert.Nil(t, err)
@@ -62,7 +61,7 @@ func TestStorage(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("DeleteTicket", func(t *testing.T) {
-		err = adb.DeleteTicket("3")
+		err := adb.DeleteTicket("3")
 		assert.Nil(t, err)
 		// deleting a non-existing ticket is ok
 		err = adb.DeleteTicket("20")
@@ -72,7 +71,7 @@ func TestStorage(t *testing.T) {
 		t1 := Todo{TicketId: "1", Item: "test1"}
 		t2 := Todo{TicketId: "2"}
 		t30 := Todo{TicketId: "30"}
-		err = adb.CreateTodo(t1)
+		err := adb.CreateTodo(t1)
 		assert.Nil(t, err)
 		t1.Item = "test2"
 		err = adb.CreateTodo(t1)
@@ -111,7 +110,7 @@ func TestStorage(t *testing.T) {
 	})
 	t.Run("UpdateTodo", func(t *testing.T) {
 		t1 := Todo{TicketId: "1", Idx: 1, Item: "new item"}
-		err = adb.UpdateTodo(t1)
+		err := adb.UpdateTodo(t1)
 		assert.Nil(t, err)
 		t2, err := adb.ReadTodo(t1.TicketId, t1.Idx)
 		assert.Nil(t, err)
@@ -123,7 +122,7 @@ func TestStorage(t *testing.T) {
 	})
 	t.Run("DeleteTodo", func(t *testing.T) {
 		t2 := Todo{TicketId: "2", Idx: 1}
-		err = adb.DeleteTodo(t2)
+		err := adb.DeleteTodo(t2)
 		assert.Nil(t, err)
 		// deleting a non-existing ticket is ok
 		t2.Id = 100

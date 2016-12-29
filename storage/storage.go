@@ -1,5 +1,5 @@
 /*
-	CRUD for Ticket and Todo
+	package storage implements CRUD for Ticket and Todo
 */
 
 package storage
@@ -11,12 +11,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
+//
 type AppDB struct {
-	db *sqlx.DB
+	db  *sqlx.DB
+	URL string
 }
 
-func (adb *AppDB) MustInit(dbLoc string) {
-	adb.db = sqlx.MustConnect("postgres", dbLoc)
+// MustInit connects to the database
+func (adb *AppDB) MustInit() {
+	adb.db = sqlx.MustConnect("postgres", adb.URL)
 	log.Println("database connected.")
 }
 
@@ -41,7 +44,8 @@ func (adb *AppDB) GetAll() ([]Ticket, error) {
 	return tickets, rows.Err()
 }
 
-func (adb *AppDB) MustCreateTables(dbLoc string) {
+// MustCreateTables creates the ticket and todo tables
+func (adb *AppDB) MustCreateTables() {
 	schema := `
 	CREATE TABLE ticket (
 		id          VARCHAR(16) PRIMARY KEY,
@@ -58,13 +62,13 @@ func (adb *AppDB) MustCreateTables(dbLoc string) {
 		item      VARCHAR(32) NOT NULL,
 		done      BOOLEAN NOT NULL
 	);`
-	db := sqlx.MustConnect("postgres", dbLoc)
-	db.MustExec(schema)
-	adb.db = db
+	adb.db.MustExec(schema)
 	log.Println("Tables created.")
 }
 
+// MustDropTables drops the ticket and todo tables
 func (adb *AppDB) MustDropTables() {
-	adb.db.MustExec(`DROP TABLE ticket; DROP TABLE todo;`)
+	adb.db.MustExec(`DROP TABLE IF EXISTS ticket;`)
+	adb.db.MustExec(`DROP TABLE IF EXISTS todo;`)
 	log.Println("Tables dropped.")
 }
