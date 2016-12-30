@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -124,4 +125,21 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, true, (*reply.Tickets[1].Todos[1]).Done)
 	})
 	teardown()
+}
+
+func TestStr2JSON(t *testing.T) {
+	testStrs := []struct {
+		in  string
+		out string
+	}{
+		{`a:b`, `{"a":"b"}`},
+		{`id:test1 detail:test1`, `{"id":"test1", "detail":"test1"}`},
+	}
+	for _, tt := range testStrs {
+		reader := str2reader(tt.in)
+		bArray, err := ioutil.ReadAll(reader)
+		assert.Nil(t, err)
+		str := string(bArray)
+		assert.Equal(t, tt.out, str)
+	}
 }

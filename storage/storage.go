@@ -30,7 +30,7 @@ func (adb *AppDB) MustInit() {
 func (adb *AppDB) All() ([]Ticket, error) {
 	rows, err := adb.db.Queryx("SELECT * FROM ticket")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -39,7 +39,7 @@ func (adb *AppDB) All() ([]Ticket, error) {
 		i := Ticket{}
 		err = rows.StructScan(&i)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		tickets = append(tickets, i)
 	}

@@ -43,7 +43,8 @@ func (app *application) Data(w http.ResponseWriter, req *http.Request) error {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	reply := map[string]interface{}{
-		"tickets": tickets,
+		"tickets":     tickets,
+		"last_update": app.db.LastUpdate.String(),
 	}
 	if err := json.NewEncoder(w).Encode(reply); err != nil {
 		return err

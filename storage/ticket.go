@@ -21,6 +21,7 @@ func (adb *AppDB) CreateTicket(t Ticket) error {
 	if err != nil {
 		return fmt.Errorf("%v, %v", errMsg, err)
 	}
+	adb.LastUpdate = time.Now()
 	return nil
 }
 
@@ -33,10 +34,18 @@ func (adb *AppDB) ReadTicket(id string) (Ticket, error) {
 
 func (adb *AppDB) UpdateTicket(t Ticket) error {
 	_, err := adb.db.NamedExec(`UPDATE ticket SET detail=:detail, start_time=:start_time, end_time=:end_time, priority=:priority WHERE id=:id;`, &t)
-	return err
+	if err != nil {
+		return err
+	}
+	adb.LastUpdate = time.Now()
+	return nil
 }
 
 func (adb *AppDB) DeleteTicket(id string) error {
 	_, err := adb.db.Exec(`DELETE FROM ticket WHERE id=$1;`, id)
-	return err
+	if err != nil {
+		return err
+	}
+	adb.LastUpdate = time.Now()
+	return nil
 }

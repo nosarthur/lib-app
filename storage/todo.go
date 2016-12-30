@@ -1,6 +1,9 @@
 package storage
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Todo struct {
 	Id       int64  `db:"id" json:"id"`
@@ -32,6 +35,7 @@ func (adb *AppDB) CreateTodo(t Todo) error {
 	if err != nil {
 		return fmt.Errorf("%v, %v", errMsg, err)
 	}
+	adb.LastUpdate = time.Now()
 	return nil
 }
 
@@ -72,11 +76,19 @@ func (adb *AppDB) ReadTodos(ticket_id string) ([]*Todo, error) {
 // UpdateTodo relies on the ticket_id and idx
 func (adb *AppDB) UpdateTodo(t Todo) error {
 	_, err := adb.db.NamedExec(`UPDATE todo SET item=:item, done=:done WHERE ticket_id=:ticket_id AND idx=:idx;`, &t)
-	return err
+	if err != nil {
+		return err
+	}
+	adb.LastUpdate = time.Now()
+	return nil
 }
 
 // DeleteTodo relies on the ticket_id and idx
 func (adb *AppDB) DeleteTodo(t Todo) error {
 	_, err := adb.db.NamedExec(`DELETE FROM todo WHERE ticket_id=:ticket_id AND idx=:idx;`, &t)
-	return err
+	if err != nil {
+		return err
+	}
+	adb.LastUpdate = time.Now()
+	return nil
 }
