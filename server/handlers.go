@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/nosarthur/todobot/storage"
 )
 
@@ -67,9 +65,12 @@ func (app *application) AddTicket(w http.ResponseWriter, req *http.Request) erro
 
 // EndTicket handles request of http:delete::/ticket/end/id
 func (app *application) EndTicket(w http.ResponseWriter, req *http.Request) error {
-	vars := mux.Vars(req)
-	t, err := app.db.ReadTicket(vars["id"])
-	errMsg := fmt.Sprintf("Cannot end Ticket with id=%v.", vars["id"])
+	t := storage.Ticket{}
+	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
+		return err
+	}
+	t, err := app.db.ReadTicket(t.Id)
+	errMsg := fmt.Sprintf("Cannot end Ticket with id=%v.", t.Id)
 	if err != nil {
 		return fmt.Errorf("%v %v", errMsg, err)
 	}
@@ -103,15 +104,14 @@ func (app *application) AddTodo(w http.ResponseWriter, req *http.Request) error 
 
 // EndTodo handles request of http:delete::/todo/ticket_id/idx
 func (app *application) EndTodo(w http.ResponseWriter, req *http.Request) error {
-	vars := mux.Vars(req)
-	if _, err := app.db.ReadTicket(vars["ticket_id"]); err != nil {
+	t := storage.Todo{}
+	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
 		return err
 	}
-	idx, err := strconv.ParseInt(vars["idx"], 10, 64)
-	if err != nil {
+	if _, err := app.db.ReadTicket(t.TicketId); err != nil {
 		return err
 	}
-	t, err := app.db.ReadTodo(vars["ticket_id"], idx)
+	t, err := app.db.ReadTodo(t.TicketId, t.Idx)
 	if err != nil {
 		return err
 	}

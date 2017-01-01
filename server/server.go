@@ -13,35 +13,42 @@ import (
 	"github.com/nosarthur/todobot/storage"
 )
 
-// appHandler decorates the http handlers with logging
-type appHandler func(http.ResponseWriter, *http.Request) error
+// logHandler decorates the http handlers with logging
+type logHandler func(http.ResponseWriter, *http.Request) error
 
-func (fn appHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (fn logHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := fn(w, req); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-// authHandler decorates the http handlers with authentication and logging
-func authHandler(f func(http.ResponseWriter, *http.Request) error) appHandler {
+// authHandler decorates the logHandlers with authentication
+func authHandler(fn logHandler) logHandler {
 	authf := func(w http.ResponseWriter, req *http.Request) error {
 		if req.Header.Get("Token") != os.Getenv("Token") {
 			return fmt.Errorf("Authentication failed.")
 		}
-		return f(w, req)
+		return fn(w, req)
 	}
-	return appHandler(authf)
+	return logHandler(authf)
 }
 
 type application struct {
-	db storage.AppDB
+	db          storage.AppDB
+	slackRoutes map[string]logHandler
 }
 
 // NewApplication creates a new application with the associated database initialized
 func NewApplication(dbURL string) *application {
 	app := application{db: storage.AppDB{URL: dbURL}}
 	app.db.MustInit()
+	app.slackRoutes = map[string]logHandler{
+		"/ticket/add": authHandler(logHandler(app.AddTicket)),
+		"/ticket/end": authHandler(logHandler(app.EndTicket)),
+		"/todo/add":   authHandler(logHandler(app.AddTodo)),
+		"/todo/end":   authHandler(logHandler(app.EndTodo)),
+	}
 	return &app
 }
 
@@ -49,18 +56,15 @@ func NewApplication(dbURL string) *application {
 func NewRouter(app *application) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
-	// these four handlers require authentication
-	ticket := router.PathPrefix("/ticket").Subrouter()
-	ticket.Handle("/add", authHandler(app.AddTicket)).Methods("POST")
-	ticket.Handle("/end/{id}", authHandler(app.EndTicket)).Methods("DELETE")
+	for url, handler := range app.slackRoutes {
+		router.Handle(url, handler).Methods("POST")
+	}
+	//router.Handle("/ticket/end/{id}", ).Methods("POST")
+	//	todo.Handle("/end/{ticket_id}/{idx}", ).Methods("DELETE")
 
-	todo := router.PathPrefix("/todo").Subrouter()
-	todo.Handle("/add", authHandler(app.AddTodo)).Methods("POST")
-	todo.Handle("/end/{ticket_id}/{idx}", authHandler(app.EndTodo)).Methods("DELETE")
+	router.Handle("/data", logHandler(app.Data)).Methods("GET")
+	router.Handle("/slack", logHandler(app.Slack)).Methods("POST")
 
-	// these two handlers do not require authentication
-	router.Handle("/data", appHandler(app.Data)).Methods("GET")
-	router.Handle("/slack", appHandler(app.Slack)).Methods("POST")
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
 	return router

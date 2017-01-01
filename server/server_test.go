@@ -63,12 +63,11 @@ func TestServer(t *testing.T) {
 		runRequest(t, req, http.StatusCreated)
 	})
 	t.Run("EndTicket", func(t *testing.T) {
-		url := server.URL + "/ticket/end/test1"
-		req := makeRequest(t, url, "DELETE", "")
+		url := server.URL + "/ticket/end"
+		req := makeRequest(t, url, "POST", `{"id":"test1"}`)
 		runRequest(t, req, http.StatusAccepted)
 		// end a non-existing ticket
-		url = server.URL + "/ticket/end/test100"
-		req = makeRequest(t, url, "DELETE", "")
+		req = makeRequest(t, url, "POST", `{"id":"test100"}`)
 		runRequest(t, req, http.StatusInternalServerError)
 	})
 	t.Run("AddTodo", func(t *testing.T) {
@@ -86,12 +85,11 @@ func TestServer(t *testing.T) {
 		runRequest(t, req, http.StatusInternalServerError)
 	})
 	t.Run("EndTodo", func(t *testing.T) {
-		url := server.URL + "/todo/end/test1/1"
-		req := makeRequest(t, url, "DELETE", "")
+		url := server.URL + "/todo/end"
+		req := makeRequest(t, url, "POST", `{"ticket_id":"test1", "idx":1}`)
 		runRequest(t, req, http.StatusAccepted)
 		// end a non-existing todo
-		url = server.URL + "/todo/end/test100/1"
-		req = makeRequest(t, url, "DELETE", "")
+		req = makeRequest(t, url, "POST", `{"ticket_id":"test100", "idx":1}`)
 		runRequest(t, req, http.StatusInternalServerError)
 	})
 	t.Run("Data", func(t *testing.T) {
@@ -133,7 +131,8 @@ func TestStr2JSON(t *testing.T) {
 		out string
 	}{
 		{`a:b`, `{"a":"b"}`},
-		{`id:test1 detail:test1`, `{"id":"test1", "detail":"test1"}`},
+		{`id:test1, detail:test1`, `{"id":"test1", "detail":"test1"}`},
+		{`id:household task, detail:do laundry`, `{"id":"household task", "detail":"do laundry"}`},
 	}
 	for _, tt := range testStrs {
 		reader := str2reader(tt.in)
