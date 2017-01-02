@@ -26,7 +26,6 @@ func (app *application) Slack(w http.ResponseWriter, req *http.Request) error {
 	} else {
 		return fmt.Errorf("Unknown URL from slack: " + nextURL)
 	}
-
 	w.Write([]byte("Success!"))
 	return nil
 }

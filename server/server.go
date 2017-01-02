@@ -59,9 +59,6 @@ func NewRouter(app *application) *mux.Router {
 	for url, handler := range app.slackRoutes {
 		router.Handle(url, handler).Methods("POST")
 	}
-	//router.Handle("/ticket/end/{id}", ).Methods("POST")
-	//	todo.Handle("/end/{ticket_id}/{idx}", ).Methods("DELETE")
-
 	router.Handle("/data", logHandler(app.Data)).Methods("GET")
 	router.Handle("/slack", logHandler(app.Slack)).Methods("POST")
 

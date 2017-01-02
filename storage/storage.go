@@ -1,7 +1,6 @@
 /*
 	package storage implements CRUD for data types Ticket and Todo
 */
-
 package storage
 
 import (

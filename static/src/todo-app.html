@@ -1,29 +1,55 @@
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+
 
 <dom-module id="todo-app">
-  <template>
-    <ul>
+	<template>
+    <style>
+	.container{
+		@apply(--layout-horizontal);
+		@apply(--layout-wrap);
+	}
+    .flexchild {
+      @apply(--layout-flex);
+    }
+    paper-card {
+      width: 100%;
+      color: white;
+		box-sizing: border-box;
+		max-width: 200px;
+		margin: 4px;
+		flex: 0 0 auto;
+      --paper-card-header-color: white;
+    }
+    .gray{
+      background: var(--paper-gray-400);
+    }
+    .cyan {
+      background: var(--paper-cyan-400);
+    }
+    span[done]{
+      text-decoration: line-through;
+    }
+    </style>
+
+	<div class="container">
     <template is="dom-repeat" items="[[reply.tickets]]" as="ticket">
-      <style>
-        span[done]{
-          text-decoration: line-through;
-        }
-      </style>
-      <li><span done$={{ticket.end_time}}>
-          {{ticket.id}}: {{ticket.detail}} 
-            <span>{{_timeLapsed(ticket.start_time, ticket.end_time)}} </span>
-          </span>
-          <ol>
-            <template is="dom-repeat" items="{{ticket.todos}}" as="todo">
-              <li><span done$={{todo.done}}>
-                  {{todo.item}}
-                  </span>
-              </li>
-            </template>
-          </ol>
-      </li>
+    <paper-card done$={{ticket.end_time}} heading="{{ticket.id}}" class="cyan flexchild">
+		<div class="card-content">
+        <span done$={{ticket.end_time}}> {{ticket.detail}} </span>
+        <ol>
+          <template is="dom-repeat" items="{{ticket.todos}}" as="todo">
+          <li><span done$={{todo.done}}> {{todo.item}} </span> </li>
+          </template>
+        </ol>
+      	</div>
+		<div class="card-actions"> 
+          {{_timeLapsed(ticket.start_time, ticket.end_time)}} 
+		</div>
+    </paper-card>
     </template>
-    </ul>
+	</div>
 
     <iron-ajax
       auto
@@ -46,14 +72,10 @@
         this.reply=data.detail.response;
       },
       _timeLapsed: function (start_time, end_time){
-        time = end_time == null? Date.now() : Date.parse(end_time);
-        icon = end_time == null?  "\u2615 " : "\u2705 done in ";
-        var span = time - Date.parse(start_time);
-        var days = Math.floor(span/86400000);
-        if (days > 0) {
-          return icon + " day " + days;
-        }
-        return icon + Math.floor(span/3600000) + " hour(s) ";
+        var time = end_time == null? Date.now() : Date.parse(end_time);
+        var icon = end_time == null? "\u2615 " : "\u2705 done on ";
+        var days = Math.floor((time - Date.parse(start_time))/86400000);
+        return icon + " day " + days;
       }
     });
   </script>

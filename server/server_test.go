@@ -80,6 +80,10 @@ func TestServer(t *testing.T) {
 		// add another todo
 		req = makeRequest(t, url, "POST", `{"ticket_id": "test2"}`)
 		runRequest(t, req, http.StatusCreated)
+		// add another todo with wrong authentication token
+		req = makeRequest(t, url, "POST", `{"ticket_id": "test2"}`)
+		req.Header.Set("Token", "Token")
+		runRequest(t, req, http.StatusInternalServerError)
 		// add a todo with invalid ticket_id
 		req = makeRequest(t, url, "POST", `{"ticket_id": "test200"}`)
 		runRequest(t, req, http.StatusInternalServerError)

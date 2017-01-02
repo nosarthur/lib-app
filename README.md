@@ -54,5 +54,8 @@ To maintain:
 * sudo npm install -g bower
 * polymer init (optional)
 * bower init
-* bower install iron-ajax
+* bower install --save PolymerElements/iron-ajax
+* bower update
+* bower cache clean
+* bower prune
 * polymer build (optional)
