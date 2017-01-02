@@ -8,7 +8,7 @@ import (
 type Todo struct {
 	Id       int64  `db:"id" json:"id"`
 	TicketId string `db:"ticket_id" json:"ticket_id"`
-	Idx      int64  `db:"idx" json:"idx"`
+	Idx      int64  `db:"idx" json:"idx,string"`
 	Item     string `db:"item" json:"item"`
 	Done     bool   `db:"done" json:"done"`
 }

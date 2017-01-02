@@ -86,7 +86,7 @@ func TestServer(t *testing.T) {
 	})
 	t.Run("EndTodo", func(t *testing.T) {
 		url := server.URL + "/todo/end"
-		req := makeRequest(t, url, "POST", `{"ticket_id":"test1", "idx":1}`)
+		req := makeRequest(t, url, "POST", `{"ticket_id":"test1", "idx":"1"}`)
 		runRequest(t, req, http.StatusAccepted)
 		// end a non-existing todo
 		req = makeRequest(t, url, "POST", `{"ticket_id":"test100", "idx":1}`)

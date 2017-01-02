@@ -10,8 +10,8 @@
         }
       </style>
       <li><span done$={{ticket.end_time}}>
-          {{ticket.id}}: {{ticket.detail}} &#9749; 
-            <span>{{_timeLapsed(ticket.start_time)}} </span>
+          {{ticket.id}}: {{ticket.detail}} 
+            <span>{{_timeLapsed(ticket.start_time, ticket.end_time)}} </span>
           </span>
           <ol>
             <template is="dom-repeat" items="{{ticket.todos}}" as="todo">
@@ -45,13 +45,15 @@
       handleResponse: function (data){
         this.reply=data.detail.response;
       },
-      _timeLapsed: function (start_time){
-        var span = Date.now() - Date.parse(start_time);
+      _timeLapsed: function (start_time, end_time){
+        time = end_time == null? Date.now() : Date.parse(end_time);
+        icon = end_time == null?  "\u2615 " : "\u2705 done in ";
+        var span = time - Date.parse(start_time);
         var days = Math.floor(span/86400000);
         if (days > 0) {
-          return days + " day(s) ";
+          return icon + " day " + days;
         }
-        return Math.floor(span/3600000) + " hour(s) ";
+        return icon + Math.floor(span/3600000) + " hour(s) ";
       }
     });
   </script>

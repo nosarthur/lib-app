@@ -41,8 +41,13 @@ func (adb *AppDB) UpdateTicket(t Ticket) error {
 	return nil
 }
 
+// DeleteTicket deletes the ticket and the associated todos
 func (adb *AppDB) DeleteTicket(id string) error {
-	_, err := adb.db.Exec(`DELETE FROM ticket WHERE id=$1;`, id)
+	_, err := adb.db.Exec(`DELETE FROM todo WHERE ticket_id=$1;`, id)
+	if err != nil {
+		return err
+	}
+	_, err = adb.db.Exec(`DELETE FROM ticket WHERE id=$1;`, id)
 	if err != nil {
 		return err
 	}
