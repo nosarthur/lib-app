@@ -1,12 +1,14 @@
 # web application of TODO list
 
-[![Build Status](https://travis-ci.org/nosarthur/todobot.svg?branch=master)](https://travis-ci.org/nosarthur/todobot)
+[![Build Status](https://travis-ci.org/nosarthur/todoslacker.svg?branch=master)](https://travis-ci.org/nosarthur/todoslacker)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
 
 This is an attempt to combine Go backend, Polymer frontend, and [Slack slash command](https://api.slack.com/slash-commands) into a todo list app.
 A working example can be seen [here](https://todoslacker.herokuapp.com/).
 
 The basic data type is called `Ticket`, and each `Ticket` contains multiple `Todo`s.
+
+Polymer color schemes can be found [here](https://material.io/guidelines/style/color.html#color-color-palette)
 
 ## test
 
