@@ -4,23 +4,23 @@
 
 
 <dom-module id="todo-app">
-	<template>
+    <template>
     <style>
-	.container{
+    .container{
 		@apply(--layout-horizontal);
 		@apply(--layout-wrap);
-	}
+    }
     .flexchild {
-      @apply(--layout-flex);
+        @apply(--layout-flex);
+        -webkit-flex: 1 0 200px; /* hack for safari */
     }
     paper-card {
-      width: 100%;
-      color: white;
-		box-sizing: border-box;
-		max-width: 200px;
-		margin: 4px;
-		flex: 0 0 auto;
-      --paper-card-header-color: white;
+        width: 100%;
+        color: white;
+        box-sizing: border-box;
+        margin: 4px;
+        flex: 0 0 auto;
+        --paper-card-header-color: white;
     }
     .gray{
       background: var(--paper-gray-400);
@@ -35,7 +35,7 @@
 
 	<div class="container">
     <template is="dom-repeat" items="[[reply.tickets]]" as="ticket">
-    <paper-card done$={{ticket.end_time}} heading="{{ticket.id}}" class="cyan flexchild">
+    <paper-card done$={{ticket.end_time}} heading="{{ticket.id}}" class="flexchild cyan">
 		<div class="card-content">
         <span done$={{ticket.end_time}}> {{ticket.detail}} </span>
         <ol>
