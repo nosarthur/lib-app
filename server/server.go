@@ -23,8 +23,8 @@ func (fn logHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// authHandler decorates the logHandlers with authentication
-func authHandler(fn logHandler) logHandler {
+// auth decorates the logHandlers with authentication
+func auth(fn logHandler) logHandler {
 	authf := func(w http.ResponseWriter, req *http.Request) error {
 		if req.Header.Get("Token") != os.Getenv("Token") {
 			return fmt.Errorf("Authentication failed.")
@@ -44,10 +44,10 @@ func NewApplication(dbURL string) *application {
 	app := application{db: storage.AppDB{URL: dbURL}}
 	app.db.MustInit()
 	app.slackRoutes = map[string]logHandler{
-		"/ticket/add": authHandler(logHandler(app.AddTicket)),
-		"/ticket/end": authHandler(logHandler(app.EndTicket)),
-		"/todo/add":   authHandler(logHandler(app.AddTodo)),
-		"/todo/end":   authHandler(logHandler(app.EndTodo)),
+		"/ticket/add": auth(logHandler(app.AddTicket)),
+		"/ticket/end": auth(logHandler(app.EndTicket)),
+		"/todo/add":   auth(logHandler(app.AddTodo)),
+		"/todo/end":   auth(logHandler(app.EndTodo)),
 	}
 	return &app
 }
@@ -61,6 +61,9 @@ func NewRouter(app *application) *mux.Router {
 	}
 	router.Handle("/data", logHandler(app.Data)).Methods("GET")
 	router.Handle("/slack", logHandler(app.Slack)).Methods("POST")
+
+	router.Handle("/todo/delete", auth(logHandler(app.DeleteTodo))).Methods("DELETE")
+	router.Handle("/ticket/delete", auth(logHandler(app.DeleteTicket))).Methods("DELETE")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 

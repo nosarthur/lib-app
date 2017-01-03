@@ -50,7 +50,7 @@ func (app *application) Data(w http.ResponseWriter, req *http.Request) error {
 	return nil
 }
 
-// AddTicket handles request of http:post::/ticket/add/
+// AddTicket handles request of http:post::/ticket/add
 func (app *application) AddTicket(w http.ResponseWriter, req *http.Request) error {
 	t := storage.Ticket{StartTime: time.Now()}
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
@@ -63,7 +63,7 @@ func (app *application) AddTicket(w http.ResponseWriter, req *http.Request) erro
 	return nil
 }
 
-// EndTicket handles request of http:delete::/ticket/end/id
+// EndTicket handles request of http:post::/ticket/end
 func (app *application) EndTicket(w http.ResponseWriter, req *http.Request) error {
 	t := storage.Ticket{}
 	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
@@ -102,16 +102,13 @@ func (app *application) AddTodo(w http.ResponseWriter, req *http.Request) error 
 	return nil
 }
 
-// EndTodo handles request of http:delete::/todo/ticket_id/idx
+// EndTodo handles request of http:post::/todo/end
 func (app *application) EndTodo(w http.ResponseWriter, req *http.Request) error {
-	t := storage.Todo{}
-	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
+	t, err := app.verifyTodoReq(req)
+	if err != nil {
 		return err
 	}
-	if _, err := app.db.ReadTicket(t.TicketId); err != nil {
-		return err
-	}
-	t, err := app.db.ReadTodo(t.TicketId, t.Idx)
+	t, err = app.db.ReadTodo(t.TicketId, t.Idx)
 	if err != nil {
 		return err
 	}
@@ -120,5 +117,35 @@ func (app *application) EndTodo(w http.ResponseWriter, req *http.Request) error 
 		return err
 	}
 	w.WriteHeader(http.StatusAccepted)
+	return nil
+}
+
+// verifyTodoReq checks if the request contains a valid Todo
+func (app *application) verifyTodoReq(req *http.Request) (storage.Todo, error) {
+	t := storage.Todo{}
+	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
+		return t, err
+	}
+	if _, err := app.db.ReadTicket(t.TicketId); err != nil {
+		return t, err
+	}
+	return t, nil
+}
+
+// DeleteTodo handles request of http:delete::/todo/end
+func (app *application) DeleteTodo(w http.ResponseWriter, req *http.Request) error {
+	t, err := app.verifyTodoReq(req)
+	if err != nil {
+		return err
+	}
+	if err := app.db.DeleteTodo(t); err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusAccepted)
+	return nil
+}
+
+// DeleteTicket handles request of http:delete::/ticket/end
+func (app *application) DeleteTicket(w http.ResponseWriter, req *http.Request) error {
 	return nil
 }
