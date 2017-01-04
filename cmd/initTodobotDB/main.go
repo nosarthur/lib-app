@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/nosarthur/todobot/storage"
+	"github.com/nosarthur/todoslacker/storage"
 )
 
 func main() {

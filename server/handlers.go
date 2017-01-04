@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/nosarthur/todobot/storage"
+	"github.com/nosarthur/todoslacker/storage"
 )
 
 // handlers in this file are all of the type
@@ -132,7 +132,7 @@ func (app *application) verifyTodoReq(req *http.Request) (storage.Todo, error) {
 	return t, nil
 }
 
-// DeleteTodo handles request of http:delete::/todo/end
+// DeleteTodo handles request of http:delete::/todo/delete
 func (app *application) DeleteTodo(w http.ResponseWriter, req *http.Request) error {
 	t, err := app.verifyTodoReq(req)
 	if err != nil {
@@ -145,7 +145,15 @@ func (app *application) DeleteTodo(w http.ResponseWriter, req *http.Request) err
 	return nil
 }
 
-// DeleteTicket handles request of http:delete::/ticket/end
+// DeleteTicket handles request of http:delete::/ticket/delete
 func (app *application) DeleteTicket(w http.ResponseWriter, req *http.Request) error {
+	t := storage.Ticket{}
+	if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
+		return err
+	}
+	if err := app.db.DeleteTicket(t.Id); err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusAccepted)
 	return nil
 }

@@ -1,7 +1,7 @@
 {
   "name": "todo-app",
-  "homepage": "https://github.com/nosarthur/todobot",
-  "description": "todo-list",
+  "homepage": "https://github.com/nosarthur/todoslacker",
+  "description": "todo-list with slack integration",
   "main": "index.html",
   "authors": [
     "Dong Zhou <zhou.dong@gmail.com>"

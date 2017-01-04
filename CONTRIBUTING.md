@@ -11,7 +11,7 @@ I would like to collaborate. There are many ways to contribute to this project
 Fork, then clone the repo:
 
 ``` git
-git clone git@github.com:your-username/todobot.git
+git clone git@github.com:your-username/todoslacker.git
 ```
 
 Make your changes and make sure all tests pass.

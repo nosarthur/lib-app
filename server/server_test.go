@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nosarthur/todobot/storage"
+	"github.com/nosarthur/todoslacker/storage"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,6 +61,9 @@ func TestServer(t *testing.T) {
 		// add another ticket
 		req = makeRequest(t, url, "POST", `{"id": "test2", "detail": "test2"}`)
 		runRequest(t, req, http.StatusCreated)
+		// add another ticket
+		req = makeRequest(t, url, "POST", `{"id": "test3", "detail": "test3"}`)
+		runRequest(t, req, http.StatusCreated)
 	})
 	t.Run("EndTicket", func(t *testing.T) {
 		url := server.URL + "/ticket/end"
@@ -83,6 +86,9 @@ func TestServer(t *testing.T) {
 		// add another todo
 		req = makeRequest(t, url, "POST", `{"ticket_id": "test2"}`)
 		runRequest(t, req, http.StatusCreated)
+		// add another todo
+		req = makeRequest(t, url, "POST", `{"ticket_id": "test3"}`)
+		runRequest(t, req, http.StatusCreated)
 		// add another todo with wrong authentication token
 		req = makeRequest(t, url, "POST", `{"ticket_id": "test2"}`)
 		req.Header.Set("Token", "Token")
@@ -103,9 +109,17 @@ func TestServer(t *testing.T) {
 		url := server.URL + "/todo/delete"
 		req := makeRequest(t, url, "DELETE", `{"ticket_id":"test2", "idx":"2"}`)
 		runRequest(t, req, http.StatusAccepted)
-		// end a non-existing todo
+		// deleting a non-existing todo
 		req = makeRequest(t, url, "DELETE", `{"ticket_id":"test100", "idx":1}`)
 		runRequest(t, req, http.StatusInternalServerError)
+	})
+	t.Run("DeleteTicket", func(t *testing.T) {
+		url := server.URL + "/ticket/delete"
+		req := makeRequest(t, url, "DELETE", `{"id":"test3"}`)
+		runRequest(t, req, http.StatusAccepted)
+		// deleting a non-existing ticket is ok
+		req = makeRequest(t, url, "DELETE", `{"id":"test3"}`)
+		runRequest(t, req, http.StatusAccepted)
 	})
 	t.Run("Data", func(t *testing.T) {
 		url := server.URL + "/data"
@@ -136,9 +150,6 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, "todo1", (*reply.Tickets[1].Todos[1]).Item)
 		assert.Equal(t, false, (*reply.Tickets[1].Todos[0]).Done)
 		assert.Equal(t, true, (*reply.Tickets[1].Todos[1]).Done)
-	})
-	// to be finished
-	t.Run("DeleteTicket", func(t *testing.T) {
 	})
 	teardown()
 }

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/nosarthur/todobot/server"
+	"github.com/nosarthur/todoslacker/server"
 )
 
 func main() {

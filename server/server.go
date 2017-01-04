@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/nosarthur/todobot/storage"
+	"github.com/nosarthur/todoslacker/storage"
 )
 
 // logHandler decorates the http handlers with logging
