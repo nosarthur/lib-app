@@ -47,7 +47,7 @@
 
 	<div class="container">
     <template is="dom-repeat" items="[[reply.tickets]]" as="ticket">
-    <paper-card done$={{ticket.end_time}} priority$={{ticket.priority}} heading="{{ticket.id}}" class="flexchild">
+    <paper-card done$={{ticket.end_time}} priority$={{_toBoolean(ticket.priority)}} heading="{{ticket.id}}" class="flexchild">
 		<div class="card-content"> {{ticket.detail}} 
         <ol>
           <template is="dom-repeat" items="{{ticket.todos}}" as="todo">
@@ -81,6 +81,9 @@
       },
       handleResponse: function (data){
         this.reply=data.detail.response;
+      },
+      _toBoolean: function (text){
+        return text == 'true';
       },
       _timeLapsed: function (start_time, end_time){
         var time = end_time == null? Date.now() : Date.parse(end_time);
