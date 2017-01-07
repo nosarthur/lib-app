@@ -19,6 +19,7 @@
     }
     paper-toolbar {
         --paper-toolbar-background: var(--paper-orange-400);
+        margin: 4px;
     }
     paper-card {
         width: 100%;
@@ -87,7 +88,7 @@
       },
       _timeLapsed: function (start_time, end_time){
         var time = end_time == null? Date.now() : Date.parse(end_time);
-        var icon = end_time == null? "\u231B" : "\u2714 done on ";
+        var icon = end_time == null? "" : "\u2714\uFE0E done on ";
         var days = Math.floor((time - Date.parse(start_time))/86400000);
         return icon + " day " + days;
       }
