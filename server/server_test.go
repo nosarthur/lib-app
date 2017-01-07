@@ -65,6 +65,17 @@ func TestServer(t *testing.T) {
 		req = makeRequest(t, url, "POST", `{"id": "test3", "detail": "test3"}`)
 		runRequest(t, req, http.StatusCreated)
 	})
+	t.Run("UpdateTicket", func(t *testing.T) {
+		url := server.URL + "/ticket/update"
+		req := makeRequest(t, url, "POST", `{"id": "test1", "detail": "test1 update"}`)
+		runRequest(t, req, http.StatusCreated)
+		// update another one
+		req = makeRequest(t, url, "POST", `{"id": "test2", "priority": "true"}`)
+		runRequest(t, req, http.StatusCreated)
+		// update a non-existing ticket
+		req = makeRequest(t, url, "POST", `{"id": "test100", "detail": "test1 update"}`)
+		runRequest(t, req, http.StatusInternalServerError)
+	})
 	t.Run("EndTicket", func(t *testing.T) {
 		url := server.URL + "/ticket/end"
 		req := makeRequest(t, url, "POST", `{"id":"test1"}`)
@@ -139,13 +150,17 @@ func TestServer(t *testing.T) {
 		// reply.Tickets[0] is test2
 		// reply.Tickets[1] is test1
 		// hopefully this ordering doesn't vary on machine
-		assert.Nil(t, reply.Tickets[0].EndTime)
-		assert.NotNil(t, reply.Tickets[1].EndTime)
-		assert.Equal(t, "test1", reply.Tickets[1].Id)
 		assert.Equal(t, "test2", reply.Tickets[0].Id)
-		assert.Equal(t, 2, len(reply.Tickets[1].Todos))
+		assert.Nil(t, reply.Tickets[0].EndTime)
+		assert.Equal(t, true, reply.Tickets[0].Priority)
 		assert.Equal(t, 1, len(reply.Tickets[0].Todos))
 		assert.Equal(t, "", (*reply.Tickets[0].Todos[0]).Item)
+
+		assert.Equal(t, "test1", reply.Tickets[1].Id)
+		assert.Equal(t, "test1 update", reply.Tickets[1].Detail)
+		assert.Equal(t, false, reply.Tickets[1].Priority)
+		assert.NotNil(t, reply.Tickets[1].EndTime)
+		assert.Equal(t, 2, len(reply.Tickets[1].Todos))
 		assert.Equal(t, "todo1", (*reply.Tickets[1].Todos[0]).Item)
 		assert.Equal(t, "todo1", (*reply.Tickets[1].Todos[1]).Item)
 		assert.Equal(t, false, (*reply.Tickets[1].Todos[0]).Done)

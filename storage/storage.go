@@ -5,7 +5,6 @@ package storage
 
 import (
 	"log"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -13,9 +12,8 @@ import (
 
 // AppDB contains information of the database
 type AppDB struct {
-	db         *sqlx.DB
-	URL        string
-	LastUpdate time.Time
+	db  *sqlx.DB
+	URL string
 }
 
 // MustInit connects to the database

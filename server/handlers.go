@@ -41,8 +41,7 @@ func (app *application) Data(w http.ResponseWriter, req *http.Request) error {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	reply := map[string]interface{}{
-		"tickets":     tickets,
-		"last_update": app.db.LastUpdate.String(),
+		"tickets": tickets,
 	}
 	if err := json.NewEncoder(w).Encode(reply); err != nil {
 		return err
@@ -57,6 +56,30 @@ func (app *application) AddTicket(w http.ResponseWriter, req *http.Request) erro
 		return err
 	}
 	if err := app.db.CreateTicket(t); err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusCreated)
+	return nil
+}
+
+// UpdateTicket handles request of http:post::/ticket/update
+// It only updates the fields: detail and priority
+func (app *application) UpdateTicket(w http.ResponseWriter, req *http.Request) error {
+	msg := storage.Ticket{}
+	if err := json.NewDecoder(req.Body).Decode(&msg); err != nil {
+		return err
+	}
+	t, err := app.db.ReadTicket(msg.Id)
+	if err != nil {
+		return err
+	}
+	if msg.Detail != "" {
+		t.Detail = msg.Detail
+	}
+	if msg.Priority == true {
+		t.Priority = msg.Priority
+	}
+	if err := app.db.UpdateTicket(t); err != nil {
 		return err
 	}
 	w.WriteHeader(http.StatusCreated)

@@ -44,10 +44,11 @@ func NewApplication(dbURL string) *application {
 	app := application{db: storage.AppDB{URL: dbURL}}
 	app.db.MustInit()
 	app.slackRoutes = map[string]logHandler{
-		"/ticket/add": auth(logHandler(app.AddTicket)),
-		"/ticket/end": auth(logHandler(app.EndTicket)),
-		"/todo/add":   auth(logHandler(app.AddTodo)),
-		"/todo/end":   auth(logHandler(app.EndTodo)),
+		"/ticket/add":    auth(logHandler(app.AddTicket)),
+		"/ticket/update": auth(logHandler(app.UpdateTicket)),
+		"/ticket/end":    auth(logHandler(app.EndTicket)),
+		"/todo/add":      auth(logHandler(app.AddTodo)),
+		"/todo/end":      auth(logHandler(app.EndTodo)),
 	}
 	return &app
 }

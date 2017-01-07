@@ -1,9 +1,6 @@
 package storage
 
-import (
-	"fmt"
-	"time"
-)
+import "fmt"
 
 type Todo struct {
 	Id       int64  `db:"id" json:"id"`
@@ -35,7 +32,6 @@ func (adb *AppDB) CreateTodo(t Todo) error {
 	if err != nil {
 		return fmt.Errorf("%v, %v", errMsg, err)
 	}
-	adb.LastUpdate = time.Now()
 	return nil
 }
 
@@ -79,7 +75,6 @@ func (adb *AppDB) UpdateTodo(t Todo) error {
 	if err != nil {
 		return err
 	}
-	adb.LastUpdate = time.Now()
 	return nil
 }
 
@@ -89,6 +84,5 @@ func (adb *AppDB) DeleteTodo(t Todo) error {
 	if err != nil {
 		return err
 	}
-	adb.LastUpdate = time.Now()
 	return nil
 }

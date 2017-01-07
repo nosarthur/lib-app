@@ -12,7 +12,7 @@ type Ticket struct {
 	Todos     []*Todo    `json:"todos"`
 	StartTime time.Time  `db:"start_time" json:"start_time"`
 	EndTime   *time.Time `db:"end_time" json:"end_time"`
-	Priority  bool       `db:"priority" json:"priority"`
+	Priority  bool       `db:"priority" json:"priority,string"`
 }
 
 func (adb *AppDB) CreateTicket(t Ticket) error {
@@ -21,7 +21,6 @@ func (adb *AppDB) CreateTicket(t Ticket) error {
 	if err != nil {
 		return fmt.Errorf("%v, %v", errMsg, err)
 	}
-	adb.LastUpdate = time.Now()
 	return nil
 }
 
@@ -32,12 +31,12 @@ func (adb *AppDB) ReadTicket(id string) (Ticket, error) {
 	return t, err
 }
 
+// UpdateTicket updates ALL fields except ticket id
 func (adb *AppDB) UpdateTicket(t Ticket) error {
 	_, err := adb.db.NamedExec(`UPDATE ticket SET detail=:detail, start_time=:start_time, end_time=:end_time, priority=:priority WHERE id=:id;`, &t)
 	if err != nil {
 		return err
 	}
-	adb.LastUpdate = time.Now()
 	return nil
 }
 
@@ -51,6 +50,5 @@ func (adb *AppDB) DeleteTicket(id string) error {
 	if err != nil {
 		return err
 	}
-	adb.LastUpdate = time.Now()
 	return nil
 }
