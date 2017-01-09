@@ -51,7 +51,7 @@
     <paper-card done$={{ticket.end_time}} priority$={{_toBoolean(ticket.priority)}} heading="{{ticket.id}}" class="flexchild">
 		<div class="card-content"> {{ticket.detail}} 
         <ol>
-          <template is="dom-repeat" items="{{ticket.todos}}" as="todo">
+          <template is="dom-repeat" items="{{ticket.todos}}" as="todo" sort="_sortTodos">
           <li><span done$={{todo.done}}> {{todo.item}} </span> </li>
           </template>
         </ol>
@@ -85,6 +85,10 @@
       },
       _toBoolean: function (text){
         return text == 'true';
+      },
+      _sortTodos: function(a, b){
+        if (a.idx < b.idx) { return -1; }
+        else { return 1; }
       },
       _timeLapsed: function (start_time, end_time){
         var time = end_time == null? Date.now() : Date.parse(end_time);
