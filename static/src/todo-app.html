@@ -30,10 +30,10 @@
         --paper-card-header-color: white;
         --paper-card-background-color: var(--paper-cyan-400);
     }
-    paper-card[done]{
+    .finished{
         --paper-card-background-color: var(--paper-cyan-100);
     }
-    paper-card[priority]{
+    .prioritized{
         --paper-card-background-color: var(--paper-cyan-800);
     }
     span[done]{
@@ -42,13 +42,13 @@
     </style>
 
     <paper-toolbar>
-        <paper-icon-button icon="menu"></paper-icon-button>
+        <paper-icon-button icon="menu" active="{{isHidden}}" toggles></paper-icon-button>
         <span class="title">TodoSlacker</span>
     </paper-toolbar>
 
 	<div class="container">
     <template is="dom-repeat" items="[[reply.tickets]]" as="ticket">
-    <paper-card done$={{ticket.end_time}} priority$={{_toBoolean(ticket.priority)}} heading="{{ticket.id}}" class="flexchild">
+    <paper-card heading="{{ticket.id}}" class$="[[_getClass(ticket.priority, ticket.end_time)]]" hidden$="[[_toggle(ticket.end_time, isHidden)]]">
 		<div class="card-content"> {{ticket.detail}} 
         <ol>
           <template is="dom-repeat" items="{{ticket.todos}}" as="todo" sort="_sortTodos">
@@ -76,19 +76,23 @@
     Polymer({
       is: "todo-app",
       properties: {
-        reply: {
-          type: Object
-        }
+        reply: Object,
       },
       handleResponse: function (data){
         this.reply=data.detail.response;
       },
-      _toBoolean: function (text){
-        return text == 'true';
-      },
       _sortTodos: function(a, b){
         if (a.idx < b.idx) { return -1; }
         else { return 1; }
+      },
+      _toggle: function(isFinished, isHidden) {
+        return isFinished && !isHidden;
+      },
+      _getClass: function(priority, end_time) {
+          var result = 'flexchild ';
+          if (end_time) { return result + 'finished'; }
+          if (priority == 'true') { return result + 'prioritized'; }
+          return result;
       },
       _timeLapsed: function (start_time, end_time){
         var time = end_time == null? Date.now() : Date.parse(end_time);
