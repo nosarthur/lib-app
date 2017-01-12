@@ -47,7 +47,7 @@
     </paper-toolbar>
 
 	<div class="container">
-    <template is="dom-repeat" items="[[reply.tickets]]" as="ticket">
+    <template is="dom-repeat" items="[[reply.tickets]]" as="ticket" sort="_sortTickets">
     <paper-card heading="{{ticket.id}}" class$="[[_getClass(ticket.priority, ticket.end_time)]]" hidden$="[[_toggle(ticket.end_time, isHidden)]]">
 		<div class="card-content"> {{ticket.detail}} 
         <ol>
@@ -83,6 +83,12 @@
       },
       _sortTodos: function(a, b){
         if (a.idx < b.idx) { return -1; }
+        else { return 1; }
+      },
+      _sortTickets: function(a, b){
+        var score_a = 2*Number(a.end_time!=null) + Number(a.priority=='false');
+        var score_b = 2*Number(b.end_time!=null) + Number(b.priority=='false');
+        if (score_a < score_b) { return -1; }
         else { return 1; }
       },
       _toggle: function(isFinished, isHidden) {
