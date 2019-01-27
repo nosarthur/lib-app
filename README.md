@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/nosarthur/todoslacker.svg?branch=master)](https://travis-ci.org/nosarthur/todoslacker)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
+[![codecov](https://codecov.io/gh/nosarthur/todoslacker/branch/master/graph/badge.svg)](https://codecov.io/gh/nosarthur/todoslacker)
 
 This is an attempt to combine Go backend, Polymer frontend, and [Slack slash command](https://api.slack.com/slash-commands) into a todo list app.
 A working example can be seen [here](http://todoslacker.herokuapp.com/).

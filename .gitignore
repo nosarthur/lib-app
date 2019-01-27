@@ -2,3 +2,4 @@
 *.sqlite
 static/build
 .DS_Store
+coverage.txt

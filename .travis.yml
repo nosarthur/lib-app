@@ -10,5 +10,8 @@ branches:
 
 before_script:
   - "psql -c 'create database travis_ci_test;' -U postgres"
-script: go test ./storage ./server
-
+script:
+  - go test ./storage -coverprofile=coverage1.txt -covermode=atomic
+  - go test ./server -coverprofile=coverage2.txt -covermode=atomic
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
